@@ -5,6 +5,12 @@ Learn2Cards 是一個以 **React + TypeScript + Vite** 打造的「文件歸納�
 
 未來階段會由 Agent 產生 `deck.json`，再接入這個 UI 進行展示。
 
+## 📂 目錄結構
+
+- `frontend/`：Vite + React 前端（UI shell、sampleDeck、相關設定）。
+- `backend/`：預留給 Cloud Agent / API / 推論邏輯，目前僅放佔位檔。
+- `docs/`：需求與設計文件。
+
 
 ## 🔍 功能摘要（P0）
 
@@ -31,16 +37,16 @@ P0 版本的 UI shell 提供：
 
 ## 📁 專案結構（與 P0 相關的重點檔案）
 
-- `src/App.tsx`  
+- `frontend/src/App.tsx`  
   主要 UI 結構與互動邏輯（主題切換、翻卡、index 計算等）。
 
-- `src/App.css`  
+- `frontend/src/App.css`  
   P0 的主要樣式與版面配置。
 
-- `src/sampleDeck.ts`  
+- `frontend/src/sampleDeck.ts`  
   P0 階段使用的內建假資料 `sampleDeck`，實作 `Deck` 的最小示範內容。
 
-- `src/types.ts`  
+- `frontend/src/types.ts`  
   型別定義，包括：
   - `Paragraph`
   - `Topic`
@@ -60,9 +66,10 @@ P0 版本的 UI shell 提供：
 
 ## 🧪 安裝與開發（Development）
 
-在專案根目錄執行：
+在專案根目錄執行（前端位於 `frontend/`）：
 
 ```bash
+cd frontend
 npm install
 npm run dev    # 啟動開發伺服器（預設 http://localhost:5173）
 ```
@@ -78,24 +85,27 @@ npm run dev    # 啟動開發伺服器（預設 http://localhost:5173）
 
 ## 📦 Build：產出靜態網站
 
+在 `frontend/` 目錄下執行：
+
 ```bash
+cd frontend
 npm run build  # 產出靜態檔案
 ```
 
-Vite 會將整個專案打包為 純靜態網站，輸出到 dist/ 資料夾中。
-dist/ 內包含：
-- dist/index.html — 單頁應用入口頁面
-- dist/assets/*.js — React + TypeScript 編譯後、壓縮過的 JavaScript
-- dist/assets/*.css — 打包後的樣式檔
+Vite 會將前端打包為純靜態網站，輸出到 `frontend/dist/`：
+- `frontend/dist/index.html` — 單頁應用入口頁面
+- `frontend/dist/assets/*.js` — React + TypeScript 編譯/壓縮後的 JavaScript
+- `frontend/dist/assets/*.css` — 打包後的樣式檔
 
-Build 完成後，dist/ 內容已經是一個完整的前端網站。
-只要有一個可以提供這些檔案下載的環境（HTTP 靜態服務），瀏覽器就能直接執行，不需要再啟動 Node.js 或額外後端程式。
+Build 完成後，`frontend/dist/` 內容就是可直接部署的前端網站。
+只要有 HTTP 靜態服務（如 GitHub Pages、Netlify、S3、Nginx），瀏覽器即可直接使用，不需再啟動 Node.js 或額外後端程式。
 
 你可以用：
 ```bash
+cd frontend
 npm run preview
 ```
-在本機啟動一個簡單的預覽伺服器，測試打包後的版本。
+在本機啟動簡易預覽伺服器，測試打包後的版本。
 
 
 ## 假資料與未來 deck.json 接入說明
@@ -124,12 +134,12 @@ npm run preview
 後續階段會由 A-agent 產生標準格式的 deck.json。
 接入方式預期如下：
 
-1.將產生好的 deck.json 放入專案的 public/ 目錄：
+1.將產生好的 deck.json 放入專案的 `frontend/public/` 目錄：
 ```bash
-public/deck.json
+frontend/public/deck.json
 ```
 
-2.Vite build 時會自動將 public/deck.json 複製到 dist/deck.json
+2.Vite build 時會自動將 `frontend/public/deck.json` 複製到 `frontend/dist/deck.json`
 
 3.UI 將改為使用 fetch('/deck.json') 載入 deck 資料，例如：
 
