@@ -61,13 +61,16 @@
 - `topics.memberIds` 需對應 `paragraphs.id`；`cards.topicId` 需對應 `topics.id`。
 - `bullets` 長度 1–5，目標 3–5。
 - `stats` 與實際數量一致（可由 validate 計算驗證）。
+- 至少生成 1 個 topic；預設 `maxTopics = 5`、`topicThreshold = 0.75`。
+- 卡片生成規則：每個 topic 預設 1 張卡；若 `memberIds.length > 8` 則為 2 張卡；每卡 bullets 1–5。
+- 排序 deterministic：topic 依其 `memberIds` 中最小 `paragraphs.idx` 由小到大；card 依 topic 順序；stats 與排序重跑一致。
 
 ## A-agent：CLI 介面
-- 命令：`cli generate --input <path> --output <path> [--max-topics N] [--temperature x] [--topic-threshold y] [--model <name>] [--language zh|en|auto]`
-  - 讀 Markdown/純文字，完成：切段→重點+關鍵詞→embedding 粗分群（僅閾值分群，尊重 `maxTopics`）→LLM 群組命名/寫卡→統計→輸出 deck.json。
+- 命令：`cli generate --input <path> --output <path> [--max-topics N=5] [--temperature x] [--topic-threshold y=0.75] [--model <name>] [--language zh|en|auto]`
+  - 讀 Markdown/純文字，完成：切段→重點+關鍵詞→embedding 粗分群（僅閾值分群，尊重 `maxTopics`，至少 1 topic）→LLM 群組命名/寫卡（每 topic 預設 1 卡，若 memberIds>8 則 2 卡，bullets 1–5 目標 3–5）→統計→輸出 deck.json。
   - 預設行為（demo 規則）：若 output 未指定，寫入 `public/deck.json`（UI 用 `fetch('/deck.json')` 可直接讀）；若檔已存在，需警示（可用 `--force` 覆寫）。
 - 命令：`cli validate --input <path>`
-  - 驗證 JSON schema、必填欄位、鍵的對應關係、bullets 範圍、stats 正確性。
+  - 驗證 JSON schema、必填欄位、鍵的對應關係、bullets 範圍、stats 正確性、topic/card 排序 deterministic。
   - 若失敗，回傳錯誤清單；成功則回傳 OK。
 - 日誌：至少 console；`--verbose` 可輸出中間結果（分群、卡片摘要）。
 - 錯誤處理：輸入不存在/超過大小/編碼錯誤，需友善訊息。
