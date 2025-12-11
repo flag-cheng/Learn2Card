@@ -1,25 +1,25 @@
 # Agent B PRD：Web 翻卡介面
 
 ## 使命
-提供簡單 Web 介面載入 Agent A 的 JSON 輸出，支援分頁/序列翻卡、群組瀏覽與統計展示，作為示範用的可視化大綱。
+提供簡單 Web 介面載入 Agent A 的 JSON 輸出，支援分頁/序列翻卡、主題瀏覽與統計展示，作為示範用的可視化大綱。
 
 ## 範圍
-- 資料載入：本地檔或 API endpoint，JSON schema 與 Agent A 對齊。  
-- 卡片呈現：標題 + 3–5 摘要，上一張/下一張、分頁控制、鍵盤左右鍵。  
+- 資料載入：本地檔或 API endpoint，JSON schema 與 Agent A 對齊；demo 版以 `fetch('/deck.json')` 讀取放在 public 根目錄的輸出。  
+- 卡片呈現：標題 + 1–5 摘要（目標 3–5），上一張/下一張、分頁控制、鍵盤左右鍵。  
 - 統計區：重點/主題/卡片數。  
-- 群組瀏覽：依群組跳轉或篩選。  
+- 主題瀏覽：依 topic 跳轉或篩選。  
 - 錯誤提示：資料格式錯誤或載入失敗的提示。
 
 ## 資料介面（JSON）
-- `cards`: [{id, clusterId, title, bullets[]}]  
-- `clusters`: [{id, title, memberIds[]}]  
-- `stats`: {totalKeypoints, totalClusters, totalCards}  
+- `cards`: [{id, topicId, title, bullets[]}]  
+- `topics`: [{id, title, memberIds[]}]  
+- `stats`: {totalKeypoints, totalTopics, totalCards}  
 - 可附帶 `paragraphs` / `keypoints` 以備後續顯示。
 
 ## 功能需求
 1) 載入：檔案選擇或輸入 URL；顯示載入中狀態。  
 2) 導航：上一張/下一張；分頁（例如每頁 N 張）；鍵盤左右鍵快捷。  
-3) 群組跳轉：依 cluster 過濾/跳轉，顯示群組標題。  
+3) 主題跳轉：依 topic 過濾/跳轉，顯示主題標題。  
 4) 統計展示：同步顯示重點/主題/卡片數。  
 5) 錯誤處理：JSON schema 驗證，提供可讀提示。  
 6) UI：簡潔、可讀，行高、對比度足夠。
