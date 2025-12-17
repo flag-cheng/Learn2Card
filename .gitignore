@@ -31,6 +31,7 @@ build/
 # 編輯器設定資料夾
 .vscode/
 .idea/
+.cursor/rules
 *.swp
 *.swo
 *~
