@@ -48,8 +48,8 @@ const App = () => {
     <div className="app">
       <div className="app-shell">
         <header className="app-header">
-          <div className="app-title">文件歸納切卡機 · Demo UI Shell</div>
-          <div className="app-subtitle">資料來源：內建 sampleDeck（P0 假資料）</div>
+            <div className="app-title">文件歸納切卡機 · Demo UI Shell</div>
+            <div className="app-subtitle">資料來源：內建 sampleDeck（P0 假資料）</div>
         </header>
 
         <div className="main-layout">
