@@ -1,0 +1,965 @@
+{
+  "meta": {
+    "source": "/workspace/docs/prd/agent-a.md",
+    "generatedAt": "2025-12-20T08:34:03.884067+00:00",
+    "schemaVersion": "1.0.0"
+  },
+  "paragraphs": [
+    {
+      "id": "p1",
+      "idx": 0,
+      "text": "Agent A PRD：核心 NLP/LLM 管線",
+      "headingLevel": 1,
+      "sectionPath": [
+        "Agent A PRD：核心 NLP/LLM 管線"
+      ]
+    },
+    {
+      "id": "p2",
+      "idx": 1,
+      "text": "使命",
+      "headingLevel": 2,
+      "sectionPath": [
+        "Agent A PRD：核心 NLP/LLM 管線",
+        "使命"
+      ]
+    },
+    {
+      "id": "p3",
+      "idx": 2,
+      "text": "實作從「文件→段落→重點/關鍵詞→語意分群→卡片草稿→統計」的核心演算法/LLM 流程，輸出穩定 JSON，供其他模組使用。",
+      "sectionPath": [
+        "Agent A PRD：核心 NLP/LLM 管線",
+        "使命"
+      ]
+    },
+    {
+      "id": "p4",
+      "idx": 3,
+      "text": "範圍",
+      "headingLevel": 2,
+      "sectionPath": [
+        "Agent A PRD：核心 NLP/LLM 管線",
+        "範圍"
+      ]
+    },
+    {
+      "id": "p5",
+      "idx": 4,
+      "text": "段落切分（Markdown/純文字），保留來源索引與標題階層；規則寫死，先不做聰明合併。",
+      "sectionPath": [
+        "Agent A PRD：核心 NLP/LLM 管線",
+        "範圍"
+      ]
+    },
+    {
+      "id": "p6",
+      "idx": 5,
+      "text": "重點一句 + 關鍵詞抽取（LLM/embedding 可替換）。",
+      "sectionPath": [
+        "Agent A PRD：核心 NLP/LLM 管線",
+        "範圍"
+      ]
+    },
+    {
+      "id": "p7",
+      "idx": 6,
+      "text": "向量化與語意分群：僅用閾值分群（`topicThreshold`，預設 0.75），並可設定 `maxTopics`（預設 5，且至少 1 個主題）。",
+      "sectionPath": [
+        "Agent A PRD：核心 NLP/LLM 管線",
+        "範圍"
+      ]
+    },
+    {
+      "id": "p8",
+      "idx": 7,
+      "text": "卡片草稿生成：每主題預設 1 張卡；若 `memberIds.length > 8`，可拆成 2 張卡；每張卡標題 + 1–5 摘要（目標 3–5）。",
+      "sectionPath": [
+        "Agent A PRD：核心 NLP/LLM 管線",
+        "範圍"
+      ]
+    },
+    {
+      "id": "p9",
+      "idx": 8,
+      "text": "統計：重點數、主題數、卡片數。",
+      "sectionPath": [
+        "Agent A PRD：核心 NLP/LLM 管線",
+        "範圍"
+      ]
+    },
+    {
+      "id": "p10",
+      "idx": 9,
+      "text": "日誌/除錯：可選擇輸出中間結果。",
+      "sectionPath": [
+        "Agent A PRD：核心 NLP/LLM 管線",
+        "範圍"
+      ]
+    },
+    {
+      "id": "p11",
+      "idx": 10,
+      "text": "輸入/輸出",
+      "headingLevel": 2,
+      "sectionPath": [
+        "Agent A PRD：核心 NLP/LLM 管線",
+        "輸入/輸出"
+      ]
+    },
+    {
+      "id": "p12",
+      "idx": 11,
+      "text": "Input：原始文字、選項（語言/最大主題數或閾值、每卡摘要數、溫度/seed 等）。",
+      "sectionPath": [
+        "Agent A PRD：核心 NLP/LLM 管線",
+        "輸入/輸出"
+      ]
+    },
+    {
+      "id": "p13",
+      "idx": 12,
+      "text": "Output JSON（穩定 schema，使用 topics 命名，排序 deterministic）：",
+      "sectionPath": [
+        "Agent A PRD：核心 NLP/LLM 管線",
+        "輸入/輸出"
+      ]
+    },
+    {
+      "id": "p14",
+      "idx": 13,
+      "text": "`paragraphs`: [{id, text, headingLevel?, sectionPath?, idx}]",
+      "sectionPath": [
+        "Agent A PRD：核心 NLP/LLM 管線",
+        "輸入/輸出"
+      ]
+    },
+    {
+      "id": "p15",
+      "idx": 14,
+      "text": "`keypoints`: [{paragraphId, sentence, keywords[]}]",
+      "sectionPath": [
+        "Agent A PRD：核心 NLP/LLM 管線",
+        "輸入/輸出"
+      ]
+    },
+    {
+      "id": "p16",
+      "idx": 15,
+      "text": "`topics`: [{id, title, memberIds[], summaryBullets[]}]",
+      "sectionPath": [
+        "Agent A PRD：核心 NLP/LLM 管線",
+        "輸入/輸出"
+      ]
+    },
+    {
+      "id": "p17",
+      "idx": 16,
+      "text": "`cards`: [{id, topicId, title, bullets[1-5]}]  // 目標 3–5",
+      "sectionPath": [
+        "Agent A PRD：核心 NLP/LLM 管線",
+        "輸入/輸出"
+      ]
+    },
+    {
+      "id": "p18",
+      "idx": 17,
+      "text": "`stats`: {totalParagraphs, totalKeypoints, totalTopics, totalCards}",
+      "sectionPath": [
+        "Agent A PRD：核心 NLP/LLM 管線",
+        "輸入/輸出"
+      ]
+    },
+    {
+      "id": "p19",
+      "idx": 18,
+      "text": "功能需求",
+      "headingLevel": 2,
+      "sectionPath": [
+        "Agent A PRD：核心 NLP/LLM 管線",
+        "功能需求"
+      ]
+    },
+    {
+      "id": "p20",
+      "idx": 19,
+      "text": "段落切分：依標題/空行/清單，避免過短段落合併；保留 idx。",
+      "sectionPath": [
+        "Agent A PRD：核心 NLP/LLM 管線",
+        "功能需求"
+      ]
+    },
+    {
+      "id": "p21",
+      "idx": 20,
+      "text": "重點抽取：每段一句話摘要 + 關鍵詞（1–5），可選 deterministic 模式。",
+      "sectionPath": [
+        "Agent A PRD：核心 NLP/LLM 管線",
+        "功能需求"
+      ]
+    },
+    {
+      "id": "p22",
+      "idx": 21,
+      "text": "向量化：可配置模型；暴露維度/批次大小；失敗要回傳可讀錯誤。",
+      "sectionPath": [
+        "Agent A PRD：核心 NLP/LLM 管線",
+        "功能需求"
+      ]
+    },
+    {
+      "id": "p23",
+      "idx": 22,
+      "text": "分群：僅用相似度閾值 `topicThreshold`，並尊重 `maxTopics` 上限；至少產生 1 個主題；輸出 memberIds 與代表標題。",
+      "sectionPath": [
+        "Agent A PRD：核心 NLP/LLM 管線",
+        "功能需求"
+      ]
+    },
+    {
+      "id": "p24",
+      "idx": 23,
+      "text": "卡片草稿：每主題預設 1 張卡；若 `memberIds.length > 8`，可拆成 2 張卡；每卡 bullets 1–5（目標 3–5）。",
+      "sectionPath": [
+        "Agent A PRD：核心 NLP/LLM 管線",
+        "功能需求"
+      ]
+    },
+    {
+      "id": "p25",
+      "idx": 24,
+      "text": "統計：計算重點/主題/卡片數；隨輸出一起返回。",
+      "sectionPath": [
+        "Agent A PRD：核心 NLP/LLM 管線",
+        "功能需求"
+      ]
+    },
+    {
+      "id": "p26",
+      "idx": 25,
+      "text": "參數化：溫度、top_p、主題上限/閾值、每卡最大摘要數、max tokens。",
+      "sectionPath": [
+        "Agent A PRD：核心 NLP/LLM 管線",
+        "功能需求"
+      ]
+    },
+    {
+      "id": "p27",
+      "idx": 26,
+      "text": "可測性：提供 demo CLI 或函式，能打印中間結果。",
+      "sectionPath": [
+        "Agent A PRD：核心 NLP/LLM 管線",
+        "功能需求"
+      ]
+    },
+    {
+      "id": "p28",
+      "idx": 27,
+      "text": "非功能",
+      "headingLevel": 2,
+      "sectionPath": [
+        "Agent A PRD：核心 NLP/LLM 管線",
+        "非功能"
+      ]
+    },
+    {
+      "id": "p29",
+      "idx": 28,
+      "text": "效能：5k tokens 級別可在合理時間內完成。",
+      "sectionPath": [
+        "Agent A PRD：核心 NLP/LLM 管線",
+        "非功能"
+      ]
+    },
+    {
+      "id": "p30",
+      "idx": 29,
+      "text": "錯誤處理：輸入空檔/過長/編碼錯誤要有明確訊息。",
+      "sectionPath": [
+        "Agent A PRD：核心 NLP/LLM 管線",
+        "非功能"
+      ]
+    },
+    {
+      "id": "p31",
+      "idx": 30,
+      "text": "可替換：LLM/embedding/聚類實作可抽換，介面固定。",
+      "sectionPath": [
+        "Agent A PRD：核心 NLP/LLM 管線",
+        "非功能"
+      ]
+    },
+    {
+      "id": "p32",
+      "idx": 31,
+      "text": "驗收標準",
+      "headingLevel": 2,
+      "sectionPath": [
+        "Agent A PRD：核心 NLP/LLM 管線",
+        "驗收標準"
+      ]
+    },
+    {
+      "id": "p33",
+      "idx": 32,
+      "text": "給定範例檔，輸出 JSON 符合 schema，統計數值正確。",
+      "sectionPath": [
+        "Agent A PRD：核心 NLP/LLM 管線",
+        "驗收標準"
+      ]
+    },
+    {
+      "id": "p34",
+      "idx": 33,
+      "text": "切段、重點抽取主觀滿意度 ≥ 80%。",
+      "sectionPath": [
+        "Agent A PRD：核心 NLP/LLM 管線",
+        "驗收標準"
+      ]
+    },
+    {
+      "id": "p35",
+      "idx": 34,
+      "text": "分群結果可讀，卡片 bullets 1–5 條（目標 3–5）；同一輸入重跑排序一致（topic 依最小段落 idx 由小到大；card 依 topic 順序；stats 一致）。",
+      "sectionPath": [
+        "Agent A PRD：核心 NLP/LLM 管線",
+        "驗收標準"
+      ]
+    },
+    {
+      "id": "p36",
+      "idx": 35,
+      "text": "CLI 或單元測試可跑通。",
+      "sectionPath": [
+        "Agent A PRD：核心 NLP/LLM 管線",
+        "驗收標準"
+      ]
+    },
+    {
+      "id": "p37",
+      "idx": 36,
+      "text": "風險與緩解",
+      "headingLevel": 2,
+      "sectionPath": [
+        "Agent A PRD：核心 NLP/LLM 管線",
+        "風險與緩解"
+      ]
+    },
+    {
+      "id": "p38",
+      "idx": 37,
+      "text": "LLM 漂移：提供 deterministic 設定；允許替換模型。",
+      "sectionPath": [
+        "Agent A PRD：核心 NLP/LLM 管線",
+        "風險與緩解"
+      ]
+    },
+    {
+      "id": "p39",
+      "idx": 38,
+      "text": "分群品質：暴露群數/閾值；輸出中間相似度供調試。",
+      "sectionPath": [
+        "Agent A PRD：核心 NLP/LLM 管線",
+        "風險與緩解"
+      ]
+    },
+    {
+      "id": "p40",
+      "idx": 39,
+      "text": "成本/時延：控制輸入長度；可分批或降採樣。",
+      "sectionPath": [
+        "Agent A PRD：核心 NLP/LLM 管線",
+        "風險與緩解"
+      ]
+    }
+  ],
+  "keypoints": [
+    {
+      "paragraphId": "p1",
+      "sentence": "Agent A PRD：核心 NLP/LLM 管線",
+      "keywords": [
+        "核心",
+        "管線",
+        "心管"
+      ]
+    },
+    {
+      "paragraphId": "p2",
+      "sentence": "使命",
+      "keywords": [
+        "使命"
+      ]
+    },
+    {
+      "paragraphId": "p3",
+      "sentence": "實作從「文件→段落→重點/關鍵詞→語意分群→卡片草稿→統計」的核心演算法/LLM 流程，輸出穩定 JSON，供其他模組使用。",
+      "keywords": [
+        "文件",
+        "段落",
+        "重點",
+        "統計",
+        "流程"
+      ]
+    },
+    {
+      "paragraphId": "p4",
+      "sentence": "範圍",
+      "keywords": [
+        "範圍"
+      ]
+    },
+    {
+      "paragraphId": "p5",
+      "sentence": "段落切分（Markdown/純文字），保留來源索引與標題階層；規則寫死，先不做聰明合併。",
+      "keywords": [
+        "段落",
+        "落切",
+        "切分",
+        "分純",
+        "純文"
+      ]
+    },
+    {
+      "paragraphId": "p6",
+      "sentence": "重點一句 + 關鍵詞抽取（LLM/embedding 可替換）。",
+      "keywords": [
+        "重點",
+        "點一",
+        "一句",
+        "句關",
+        "關鍵"
+      ]
+    },
+    {
+      "paragraphId": "p7",
+      "sentence": "向量化與語意分群：僅用閾值分群（topicThreshold，預設 0.75），並可設定 maxTopics（預設 5，且至少 1 個主題）。",
+      "keywords": [
+        "預設",
+        "分群",
+        "向量",
+        "量化",
+        "化與"
+      ]
+    },
+    {
+      "paragraphId": "p8",
+      "sentence": "卡片草稿生成：每主題預設 1 張卡；若 memberIds.length > 8，可拆成 2 張卡；每張卡標題 + 1–5 摘要（目標 3–5）。",
+      "keywords": [
+        "張卡",
+        "摘要",
+        "目標",
+        "卡片",
+        "片草"
+      ]
+    },
+    {
+      "paragraphId": "p9",
+      "sentence": "統計：重點數、主題數、卡片數。",
+      "keywords": [
+        "統計",
+        "計重",
+        "重點",
+        "點數",
+        "數主"
+      ]
+    },
+    {
+      "paragraphId": "p10",
+      "sentence": "日誌/除錯：可選擇輸出中間結果。",
+      "keywords": [
+        "日誌",
+        "除錯",
+        "誌除",
+        "錯可",
+        "可選"
+      ]
+    },
+    {
+      "paragraphId": "p11",
+      "sentence": "輸入/輸出",
+      "keywords": [
+        "輸入",
+        "輸出",
+        "入輸"
+      ]
+    },
+    {
+      "paragraphId": "p12",
+      "sentence": "Input：原始文字、選項（語言/最大主題數或閾值、每卡摘要數、溫度/seed 等）。",
+      "keywords": [
+        "選項",
+        "語言",
+        "閾值",
+        "溫度",
+        "原始"
+      ]
+    },
+    {
+      "paragraphId": "p13",
+      "sentence": "Output JSON（穩定 schema，使用 topics 命名，排序 deterministic）：",
+      "keywords": [
+        "穩定",
+        "使用",
+        "命名",
+        "排序",
+        "定使"
+      ]
+    },
+    {
+      "paragraphId": "p14",
+      "sentence": "paragraphs: [{id, text, headingLevel?, sectionPath?, idx}]",
+      "keywords": [
+        "paragraphs",
+        "text",
+        "headinglevel",
+        "sectionpath",
+        "idx"
+      ]
+    },
+    {
+      "paragraphId": "p15",
+      "sentence": "keypoints: [{paragraphId, sentence, keywords[]}]",
+      "keywords": [
+        "keypoints",
+        "paragraphid",
+        "sentence",
+        "keywords"
+      ]
+    },
+    {
+      "paragraphId": "p16",
+      "sentence": "topics: [{id, title, memberIds[], summaryBullets[]}]",
+      "keywords": [
+        "topics",
+        "title",
+        "memberids",
+        "summarybullets"
+      ]
+    },
+    {
+      "paragraphId": "p17",
+      "sentence": "cards: [{id, topicId, title, bullets[1-5]}] // 目標 3–5",
+      "keywords": [
+        "目標"
+      ]
+    },
+    {
+      "paragraphId": "p18",
+      "sentence": "stats: {totalParagraphs, totalKeypoints, totalTopics, totalCards}",
+      "keywords": [
+        "stats",
+        "totalparagraphs",
+        "totalkeypoints",
+        "totaltopics",
+        "totalcards"
+      ]
+    },
+    {
+      "paragraphId": "p19",
+      "sentence": "功能需求",
+      "keywords": [
+        "功能",
+        "能需",
+        "需求",
+        "功能需求"
+      ]
+    },
+    {
+      "paragraphId": "p20",
+      "sentence": "段落切分：依標題/空行/清單，避免過短段落合併；保留 idx。",
+      "keywords": [
+        "段落",
+        "空行",
+        "清單",
+        "合併",
+        "保留"
+      ]
+    },
+    {
+      "paragraphId": "p21",
+      "sentence": "重點抽取：每段一句話摘要 + 關鍵詞（1–5），可選 deterministic 模式。",
+      "keywords": [
+        "可選",
+        "模式",
+        "重點",
+        "點抽",
+        "抽取"
+      ]
+    },
+    {
+      "paragraphId": "p22",
+      "sentence": "向量化：可配置模型；暴露維度/批次大小；失敗要回傳可讀錯誤。",
+      "keywords": [
+        "向量",
+        "量化",
+        "化可",
+        "可配",
+        "配置"
+      ]
+    },
+    {
+      "paragraphId": "p23",
+      "sentence": "分群：僅用相似度閾值 topicThreshold，並尊重 maxTopics 上限；至少產生 1 個主題；輸出 memberIds 與代表標題。",
+      "keywords": [
+        "分群",
+        "上限",
+        "輸出",
+        "群僅",
+        "僅用"
+      ]
+    },
+    {
+      "paragraphId": "p24",
+      "sentence": "卡片草稿：每主題預設 1 張卡；若 memberIds.length > 8，可拆成 2 張卡；每卡 bullets 1–5（目標 3–5）。",
+      "keywords": [
+        "張卡",
+        "每卡",
+        "目標",
+        "卡片",
+        "片草"
+      ]
+    },
+    {
+      "paragraphId": "p25",
+      "sentence": "統計：計算重點/主題/卡片數；隨輸出一起返回。",
+      "keywords": [
+        "統計",
+        "主題",
+        "計計",
+        "計算",
+        "算重"
+      ]
+    },
+    {
+      "paragraphId": "p26",
+      "sentence": "參數化：溫度、topp、主題上限/閾值、每卡最大摘要數、max tokens。",
+      "keywords": [
+        "溫度",
+        "閾值",
+        "參數",
+        "數化",
+        "化溫"
+      ]
+    },
+    {
+      "paragraphId": "p27",
+      "sentence": "可測性：提供 demo CLI 或函式，能打印中間結果。",
+      "keywords": [
+        "提供",
+        "可測",
+        "測性",
+        "性提",
+        "供或"
+      ]
+    },
+    {
+      "paragraphId": "p28",
+      "sentence": "非功能",
+      "keywords": [
+        "非功",
+        "功能",
+        "非功能"
+      ]
+    },
+    {
+      "paragraphId": "p29",
+      "sentence": "效能：5k tokens 級別可在合理時間內完成。",
+      "keywords": [
+        "效能",
+        "能級",
+        "級別",
+        "別可",
+        "可在"
+      ]
+    },
+    {
+      "paragraphId": "p30",
+      "sentence": "錯誤處理：輸入空檔/過長/編碼錯誤要有明確訊息。",
+      "keywords": [
+        "錯誤",
+        "過長",
+        "誤處",
+        "處理",
+        "理輸"
+      ]
+    },
+    {
+      "paragraphId": "p31",
+      "sentence": "可替換：LLM/embedding/聚類實作可抽換，介面固定。",
+      "keywords": [
+        "可替",
+        "替換",
+        "換聚",
+        "聚類",
+        "類實"
+      ]
+    },
+    {
+      "paragraphId": "p32",
+      "sentence": "驗收標準",
+      "keywords": [
+        "驗收",
+        "收標",
+        "標準",
+        "驗收標準"
+      ]
+    },
+    {
+      "paragraphId": "p33",
+      "sentence": "給定範例檔，輸出 JSON 符合 schema，統計數值正確。",
+      "keywords": [
+        "輸出",
+        "符合",
+        "給定",
+        "定範",
+        "範例"
+      ]
+    },
+    {
+      "paragraphId": "p34",
+      "sentence": "切段、重點抽取主觀滿意度 ≥ 80%。",
+      "keywords": [
+        "切段",
+        "段重",
+        "重點",
+        "點抽",
+        "抽取"
+      ]
+    },
+    {
+      "paragraphId": "p35",
+      "sentence": "分群結果可讀，卡片 bullets 1–5 條（目標 3–5）；同一輸入重跑排序一致（topic 依最小段落 idx 由小到大；card 依 topic 順序；stats 一致）。",
+      "keywords": [
+        "一致",
+        "卡片",
+        "目標",
+        "序一",
+        "順序"
+      ]
+    },
+    {
+      "paragraphId": "p36",
+      "sentence": "CLI 或單元測試可跑通。",
+      "keywords": [
+        "跑通",
+        "或單",
+        "單元",
+        "元測",
+        "測試"
+      ]
+    },
+    {
+      "paragraphId": "p37",
+      "sentence": "風險與緩解",
+      "keywords": [
+        "風險",
+        "險與",
+        "與緩",
+        "緩解",
+        "風險與緩解"
+      ]
+    },
+    {
+      "paragraphId": "p38",
+      "sentence": "LLM 漂移：提供 deterministic 設定；允許替換模型。",
+      "keywords": [
+        "漂移",
+        "提供",
+        "設定",
+        "移提",
+        "供設"
+      ]
+    },
+    {
+      "paragraphId": "p39",
+      "sentence": "分群品質：暴露群數/閾值；輸出中間相似度供調試。",
+      "keywords": [
+        "閾值",
+        "分群",
+        "群品",
+        "品質",
+        "質暴"
+      ]
+    },
+    {
+      "paragraphId": "p40",
+      "sentence": "成本/時延：控制輸入長度；可分批或降採樣。",
+      "keywords": [
+        "成本",
+        "時延",
+        "本時",
+        "延控",
+        "控制"
+      ]
+    }
+  ],
+  "topics": [
+    {
+      "id": "t1",
+      "title": "核心・管線・心管",
+      "memberIds": [
+        "p1",
+        "p13",
+        "p18"
+      ],
+      "summaryBullets": [
+        "Agent A PRD：核心 NLP/LLM 管線",
+        "Output JSON（穩定 schema，使用 topics 命名，排序 deterministic）：",
+        "stats: {totalParagraphs, totalKeypoints, totalTopics, totalCards}"
+      ]
+    },
+    {
+      "id": "t2",
+      "title": "使命・錯誤・過長",
+      "memberIds": [
+        "p2",
+        "p30",
+        "p38"
+      ],
+      "summaryBullets": [
+        "使命",
+        "錯誤處理：輸入空檔/過長/編碼錯誤要有明確訊息。",
+        "LLM 漂移：提供 deterministic 設定；允許替換模型。"
+      ]
+    },
+    {
+      "id": "t3",
+      "title": "重點・統計・分群",
+      "memberIds": [
+        "p3",
+        "p6",
+        "p7",
+        "p8",
+        "p9",
+        "p10",
+        "p11",
+        "p12",
+        "p14",
+        "p15",
+        "p19",
+        "p20",
+        "p21",
+        "p22",
+        "p23",
+        "p24",
+        "p25",
+        "p26",
+        "p27",
+        "p28",
+        "p29",
+        "p31",
+        "p32",
+        "p34",
+        "p35",
+        "p36",
+        "p37",
+        "p39",
+        "p40"
+      ],
+      "summaryBullets": [
+        "實作從「文件→段落→重點/關鍵詞→語意分群→卡片草稿→統計」的核心演算法/LLM 流程，輸出穩定 JSON，供其他模組使用。",
+        "重點一句 + 關鍵詞抽取（LLM/embedding 可替換）。",
+        "向量化與語意分群：僅用閾值分群（topicThreshold，預設 0.75），並可設定 maxTopics（預設 5，且至少 1 個主題）。",
+        "卡片草稿生成：每主題預設 1 張卡；若 memberIds.length > 8，可拆成 2 張卡；每張卡標題 + 1–5 摘要（目標 3–5）。",
+        "統計：重點數、主題數、卡片數。"
+      ]
+    },
+    {
+      "id": "t4",
+      "title": "範圍・輸出・符合",
+      "memberIds": [
+        "p4",
+        "p33"
+      ],
+      "summaryBullets": [
+        "範圍",
+        "給定範例檔，輸出 JSON 符合 schema，統計數值正確。"
+      ]
+    },
+    {
+      "id": "t5",
+      "title": "段落・落切・切分",
+      "memberIds": [
+        "p5",
+        "p16",
+        "p17"
+      ],
+      "summaryBullets": [
+        "段落切分（Markdown/純文字），保留來源索引與標題階層；規則寫死，先不做聰明合併。",
+        "topics: [{id, title, memberIds[], summaryBullets[]}]",
+        "cards: [{id, topicId, title, bullets[1-5]}] // 目標 3–5"
+      ]
+    }
+  ],
+  "cards": [
+    {
+      "id": "c1",
+      "topicId": "t1",
+      "title": "核心・管線・心管",
+      "bullets": [
+        "Agent A PRD：核心 NLP/LLM 管線",
+        "Output JSON（穩定 schema，使用 topics 命名，排序 deterministic）：",
+        "stats: {totalParagraphs, totalKeypoints, totalTopics, totalCards}"
+      ]
+    },
+    {
+      "id": "c2",
+      "topicId": "t2",
+      "title": "使命・錯誤・過長",
+      "bullets": [
+        "使命",
+        "錯誤處理：輸入空檔/過長/編碼錯誤要有明確訊息。",
+        "LLM 漂移：提供 deterministic 設定；允許替換模型。"
+      ]
+    },
+    {
+      "id": "c3",
+      "topicId": "t3",
+      "title": "重點・統計・分群（1/2）",
+      "bullets": [
+        "實作從「文件→段落→重點/關鍵詞→語意分群→卡片草稿→統計」的核心演算法/LLM 流程，輸出穩定 JSON，供其他模組使用。",
+        "重點一句 + 關鍵詞抽取（LLM/embedding 可替換）。",
+        "向量化與語意分群：僅用閾值分群（topicThreshold，預設 0.75），並可設定 maxTopics（預設 5，且至少 1 個主題）。",
+        "卡片草稿生成：每主題預設 1 張卡；若 memberIds.length > 8，可拆成 2 張卡；每張卡標題 + 1–5 摘要（目標 3–5）。",
+        "統計：重點數、主題數、卡片數。"
+      ]
+    },
+    {
+      "id": "c4",
+      "topicId": "t3",
+      "title": "重點・統計・分群（2/2）",
+      "bullets": [
+        "卡片草稿：每主題預設 1 張卡；若 memberIds.length > 8，可拆成 2 張卡；每卡 bullets 1–5（目標 3–5）。",
+        "統計：計算重點/主題/卡片數；隨輸出一起返回。",
+        "參數化：溫度、topp、主題上限/閾值、每卡最大摘要數、max tokens。",
+        "可測性：提供 demo CLI 或函式，能打印中間結果。",
+        "非功能"
+      ]
+    },
+    {
+      "id": "c5",
+      "topicId": "t4",
+      "title": "範圍・輸出・符合",
+      "bullets": [
+        "範圍",
+        "給定範例檔，輸出 JSON 符合 schema，統計數值正確。"
+      ]
+    },
+    {
+      "id": "c6",
+      "topicId": "t5",
+      "title": "段落・落切・切分",
+      "bullets": [
+        "段落切分（Markdown/純文字），保留來源索引與標題階層；規則寫死，先不做聰明合併。",
+        "topics: [{id, title, memberIds[], summaryBullets[]}]",
+        "cards: [{id, topicId, title, bullets[1-5]}] // 目標 3–5"
+      ]
+    }
+  ],
+  "stats": {
+    "totalParagraphs": 40,
+    "totalKeypoints": 40,
+    "totalTopics": 5,
+    "totalCards": 6
+  }
+}
