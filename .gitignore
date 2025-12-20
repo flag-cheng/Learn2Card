@@ -20,6 +20,7 @@ yarn-error.log*
 # 編譯輸出
 dist/
 frontend/dist/
+frontend/dist-node/
 build/
 *.tsbuildinfo
 
