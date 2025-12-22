@@ -1,0 +1,52 @@
+---
+alwaysApply: true
+---
+
+# Backend 開發規則
+
+## 技術棧與環境
+- **Python 版本**：3.11+  
+- **套件管理器**：**必須使用 uv**（不得使用 pip、poetry、conda 或其他工具）  
+- **依賴管理**：使用 `pyproject.toml` 管理套件版本與專案設定  
+- **專案位置**：`backend/` 目錄
+- **主要依賴**：
+  - LLM API 客戶端（如 openai、anthropic）  
+  - embedding 模型（如 sentence-transformers）  
+  - numpy/scipy 用於向量運算  
+  - pydantic 用於資料驗證
+
+## 使用 uv 的正確方式
+**重要**：uv 會自動管理虛擬環境，不需要手動建立或啟動虛擬環境。
+
+### 安裝依賴
+```bash
+cd backend
+uv sync          # 根據 pyproject.toml 安裝/同步所有依賴
+```
+
+### 執行程式
+```bash
+uv run python your_script.py        # 執行 Python 腳本
+uv run python -m your_module        # 執行模組
+uv run pytest                       # 執行測試
+```
+
+### 新增依賴
+```bash
+uv add package_name                 # 新增依賴並自動更新 pyproject.toml
+uv add --dev package_name           # 新增開發依賴
+```
+
+## 強制性規則
+### 必須遵守
+- **套件管理器**：只能使用 `uv`，不得使用 pip、pipenv、poetry、conda、pyenv 等其他工具  
+- **依賴文件**：必須使用 `pyproject.toml`，不使用 `requirements.txt`  
+- **執行方式**：使用 `uv run` 執行所有 Python 指令，不需要手動啟動虛擬環境  
+- **依賴安裝**：使用 `uv sync` 同步依賴，使用 `uv add` 新增套件
+
+### 不得實作
+- ❌ 不得使用 pip、poetry、conda 或其他套件管理器  
+- ❌ 不得使用 pyenv、asdf 等 Python 版本管理器（專案假設已有 Python 3.11+）  
+- ❌ 不得手動建立虛擬環境（`python -m venv`、`virtualenv` 等）  
+- ❌ 不得使用 `requirements.txt`（統一使用 `pyproject.toml`）  
+- ❌ 不得在沒有明確需求的情況下新增額外依賴套件
