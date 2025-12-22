@@ -1,0 +1,51 @@
+{
+  "meta": {
+    "source": "try.txt",
+    "generatedAt": "2025-12-22T09:23:37.066150+00:00",
+    "schemaVersion": "1.0.0"
+  },
+  "paragraphs": [
+    {
+      "id": "p1",
+      "idx": 0,
+      "text": "這是一個測試檔案"
+    }
+  ],
+  "keypoints": [
+    {
+      "paragraphId": "p1",
+      "sentence": "這是一個測試檔案",
+      "keywords": [
+        "這是一個測試檔案"
+      ]
+    }
+  ],
+  "topics": [
+    {
+      "id": "t1",
+      "title": "這是一個測試檔案",
+      "memberIds": [
+        "p1"
+      ],
+      "summaryBullets": [
+        "這是一個測試檔案"
+      ]
+    }
+  ],
+  "cards": [
+    {
+      "id": "c1",
+      "topicId": "t1",
+      "title": "這是一個測試檔案",
+      "bullets": [
+        "這是一個測試檔案"
+      ]
+    }
+  ],
+  "stats": {
+    "totalParagraphs": 1,
+    "totalKeypoints": 1,
+    "totalTopics": 1,
+    "totalCards": 1
+  }
+}
