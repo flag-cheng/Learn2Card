@@ -1,0 +1,44 @@
+---
+alwaysApply: true
+---
+
+# Frontend 開發規則
+
+## 技術棧與環境
+- **專案位置**：`frontend/` 目錄  
+- **前端框架**：React 18 + TypeScript  
+- **打包工具**：Vite 5  
+- **套件管理器**：npm（已有 `package.json` 和 `package-lock.json`）  
+- **Node.js 版本**：建議 18+
+- **開發指令**：
+  - 安裝依賴：`npm install`（在 `frontend/` 目錄下執行）
+  - 開發模式：`npm run dev`
+  - 建置：`npm run build`
+  - 預覽：`npm run preview`
+- **現有檔案結構**：
+  - 主程式：`src/App.tsx`（已實作卡片瀏覽基礎介面）
+  - 範例資料：`src/sampleDeck.ts`
+  - 型別定義：`src/types.ts`
+  - 樣式：`src/App.css`、`src/index.css`
+- **瀏覽器相容性**：優先支援 Chrome/Edge 桌面版（Windows 環境）
+
+## 環境設定流程
+1. 進入前端目錄：`cd frontend`
+2. 安裝依賴：`npm install`
+3. 啟動開發伺服器：`npm run dev`
+4. 瀏覽器開啟：通常是 `http://localhost:5173`
+
+## 強制性規則
+### 必須遵守
+- **專案結構**：必須在現有 `frontend/` 目錄下修改，不得重新建立專案或改變專案結構  
+- **技術棧**：必須使用現有的 React + TypeScript + Vite，不得更換框架或打包工具  
+- **套件管理**：使用 npm，不得改用 yarn、pnpm 等其他工具  
+- **現有程式碼**：在 `src/App.tsx` 的基礎上擴充，保留現有功能  
+- **TypeScript**：所有新增程式碼必須有適當的型別定義
+
+### 不得實作
+- ❌ 不得重新建立前端專案（例如執行 `npm create vite` 或類似指令）  
+- ❌ 不得更換前端框架（例如改用 Vue、Angular、Next.js 等）  
+- ❌ 不得刪除或大幅改寫現有的 `App.tsx`（應在其基礎上擴充）  
+- ❌ 不得改用 yarn、pnpm、bun 等其他套件管理器  
+- ❌ 不得在沒有明確需求的情況下新增額外 UI 框架（如 Material-UI、Ant Design 等）
