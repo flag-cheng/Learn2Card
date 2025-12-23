@@ -21,15 +21,19 @@
   - demo 版可預設載入放在 public 根目錄的 `deck.json` 範例檔  
 - **資料處理**：呼叫 Agent A 的核心管線處理文字，取得 JSON 輸出；或直接載入已處理好的 JSON 檔案  
 - 卡片呈現：標題 + 1–5 摘要（目標 3–5），上一張/下一張、分頁控制、鍵盤左右鍵。  
-- 統計區：重點/主題/卡片數。  
+- 統計區：段落/主題/卡片數（對應 stats.paragraphCount、stats.topicCount、stats.cardCount）。  
 - 主題瀏覽：依 topic 跳轉或篩選。  
 - 錯誤提示：資料格式錯誤或載入失敗的提示。
 
 ## 資料介面（JSON）
-- `cards`: [{id, topicId, title, bullets[]}]  
-- `topics`: [{id, title, memberIds[]}]  
-- `stats`: {totalKeypoints, totalTopics, totalCards}  
-- 可附帶 `paragraphs` / `keypoints` 以備後續顯示。
+**重要**：必須使用與前端 `frontend/src/sampleDeck.ts` 完全一致的 `Deck` 型別格式。
+
+- `paragraphs`: [{id: string, text: string, summary: string, keywords: string[], sourceIndex: number}]  
+- `topics`: [{id: string, title: string, memberIds: string[]}]  
+- `cards`: [{id: string, topicId: string, title: string, bullets: string[]}]  
+- `stats`: {paragraphCount: number, topicCount: number, cardCount: number}
+
+此格式由 Agent A 輸出，Agent B 載入後直接使用，確保前後端資料結構完全對齊。
 
 ## 功能需求
 1) **輸入方式（嚴格限制）**：  
@@ -39,7 +43,7 @@
    - 顯示載入中狀態與進度提示  
 2) 導航：上一張/下一張；分頁（例如每頁 N 張）；鍵盤左右鍵快捷。  
 3) 主題跳轉：依 topic 過濾/跳轉，顯示主題標題。  
-4) 統計展示：同步顯示重點/主題/卡片數。  
+4) 統計展示：同步顯示段落/主題/卡片數（使用 stats.paragraphCount、stats.topicCount、stats.cardCount）。  
 5) 錯誤處理：  
    - 檔案格式驗證：若上傳非 txt/md 檔案，顯示明確錯誤訊息  
    - JSON schema 驗證：Agent A 輸出的 JSON 格式錯誤時提供可讀提示  
@@ -74,8 +78,9 @@
 - **專案完整性**：`frontend/` 目錄結構維持不變，`npm install` 和 `npm run dev` 能正常執行。  
 - **現有功能保留**：原有的卡片瀏覽、主題切換、統計顯示功能繼續運作正常。  
 - **新增輸入功能**：能上傳 .txt 或 .md 檔案，或貼上純文字，成功呼叫 Agent A 處理並顯示卡片。  
+- **資料格式驗證**：載入的 JSON 必須符合前端 `Deck` 型別（與 `frontend/src/sampleDeck.ts` 格式一致）。  
 - 能載入範例 JSON 並正常翻卡、分頁、群組跳轉。  
-- 統計數據與 JSON 一致；錯誤 JSON 能顯示提示。  
+- 統計數據與 JSON 一致（使用 paragraphCount、topicCount、cardCount）；錯誤 JSON 能顯示提示。  
 - 上傳非 txt/md 檔案時，顯示明確的格式錯誤提示。  
 - **確認無 URL 輸入欄位**，不支援網頁抓取功能。  
 - 主要操作可被示範（滑鼠/鍵盤）。
