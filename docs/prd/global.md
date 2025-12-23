@@ -17,11 +17,11 @@
   4. 產生卡片（每卡標題 + 1–5 bullets，目標 3–5）
   5. 統計段落/主題/卡片數
   6. 輸出 `frontend/public/deck.json`（UTF-8 編碼）
-- **整合方式**（簡易 Demo 版）：
-  - Frontend 上傳檔案 → 產生指令
-  - 使用者手動到終端執行 Backend 指令
-  - Backend 更新 `deck.json` → Frontend 重新載入並顯示
-  - **不使用 HTTP API**，保持簡單
+- **整合方式**（HTTP API 版）：
+  - Backend 提供 FastAPI HTTP API server
+  - Frontend 上傳檔案 → 讀取內容並透過 HTTP POST 呼叫 Backend API
+  - Backend 處理並更新 `deck.json` → 回傳結果
+  - Frontend 自動重新載入並顯示新卡片
 - **並行開發**：Agent A（Backend）與 Agent B（Frontend）可同時開發，透過固定的 `deck.json` 介面對接
 
 > 📋 **詳細技術規範請參閱**：`docs/spec/technical-spec.md`
@@ -40,21 +40,24 @@
 ## 範圍內
 - 固定的 deck JSON schema（與 `frontend/src/types.ts` 完全一致）
 - **Agent A（Backend）**：
-  - 程式：`backend/main.py`
-  - 執行：`cd backend && uv run python main.py --text "..."`
+  - 程式：`backend/api.py`（或 `main.py` 包含 FastAPI 路由）
+  - 執行：`cd backend && uv run uvicorn api:app --reload --host 127.0.0.1 --port 8000`
+  - API Endpoint：`POST http://127.0.0.1:8000/api/process`
   - 輸出：固定到 `frontend/public/deck.json`（UTF-8 編碼）
-  - **不提供 HTTP API**（採用簡易 Demo 版）
+  - **提供 HTTP API**（FastAPI + uvicorn）
 - **Agent B（Frontend）**：
   - 從 `public/deck.json` 載入卡片資料（初始需將 `sampleDeck.ts` 轉存）
   - 上傳 `.txt` 或 `.md` 檔案，讀取內容為純文字
-  - 產生可執行的 Backend 指令並提供「複製指令」按鈕
-  - 提供「重新載入卡片」按鈕，重新 `fetch('/deck.json')`
+  - 提供參數調整 UI（threshold, maxTopics, maxBullets）
+  - 「生成卡片」按鈕透過 HTTP POST 呼叫 Backend API
+  - 處理完成後自動重新載入並顯示新卡片
   - 支援翻卡、分頁、統計、主題跳轉、錯誤提示
 - **整合任務（本 PRD）**：
   - Merge Agent A 和 Agent B 的開發分支，產生新的整合分支
-  - 確保「上傳檔案 → 產生指令 → 手動執行 Backend → 重新載入」的完整流程運作
+  - 確保「啟動 Backend → 上傳檔案 → 調整參數 → 生成卡片 → 自動顯示」的完整流程運作
+  - 驗證 Backend API 和 Frontend 的通訊正常（CORS 設定、錯誤處理等）
   - 驗證 Backend 輸出的 `deck.json` 能被 Frontend 正確讀取和顯示
-  - 處理可能的整合問題（路徑、編碼、JSON schema 一致性等）
+  - 處理可能的整合問題（API 連接、編碼、JSON schema 一致性等）
   - 驗證通過後再考慮 merge 到 master
 
 > 📋 **技術細節**：CLI 參數、JSON schema、資料流程等完整規範請參閱 `technical-spec.md`
@@ -62,34 +65,35 @@
 ## 範圍外
 - ❌ PDF、DOCX、HTML 等其他檔案格式（僅限 `.txt`, `.md`）
 - ❌ URL 輸入與網頁抓取
-- ❌ HTTP API server（採用簡易 Demo 版）
 - ❌ 帳號/權限/多人協作功能
 - ❌ 精緻動畫與複雜 UI
 - ❌ 成本最佳化策略
 - ❌ 自動化 GitHub 操作（C-agent）
 
 ## 成功指標（MVP）
+- **Backend API 正常運作**：啟動 Backend server (`uv run uvicorn api:app --reload`)，API endpoint 可正常回應
 - **Frontend 正常運作**：本地啟動 Frontend，從 `public/deck.json` 載入資料，正常翻卡、分頁、統計、主題跳轉、錯誤提示
-- **Backend 正常運作**：執行 `cd backend && uv run python main.py --text "..."` 能成功產生 `frontend/public/deck.json`，格式正確、編碼無誤
-- **檔案上傳功能**：Frontend 能上傳 `.txt` 或 `.md` 檔案，讀取內容並產生可執行的 Backend 指令
-- **完整流程打通**：上傳檔案 → 複製指令 → 執行 Backend → 重新載入 → 顯示新卡片，整個流程順暢
+- **檔案上傳功能**：Frontend 能上傳 `.txt` 或 `.md` 檔案，讀取內容並透過 API 傳送到 Backend
+- **參數調整 UI**：提供 threshold、maxTopics、maxBullets 等參數調整介面
+- **完整流程打通**：啟動 Backend → 上傳檔案 → 調整參數 → 點擊生成 → Backend 處理 → 自動重新載入 → 顯示新卡片，整個流程順暢
 - **JSON schema 穩定**：Backend 輸出格式與 Frontend 的 `types.ts` 完全一致，兩 Agent 可並行開發並正確對接
 
 ## 里程碑
 - **M1（P0）**：專案基礎架構、範例資料、型別定義、規格文件齊備。✅
 - **M2（Agent A）**：Backend 實作完成（由 Cloud Agent 在獨立分支實作）
-  - 程式位置：`backend/main.py`
-  - 執行方式：`cd backend && uv run python main.py --text "..."`
+  - 程式位置：`backend/api.py`（或 `main.py` 包含 FastAPI 路由）
+  - 執行方式：`cd backend && uv run uvicorn api:app --reload --host 127.0.0.1 --port 8000`
+  - API Endpoint：`POST http://127.0.0.1:8000/api/process`
   - 固定輸出到 `frontend/public/deck.json`
   - 驗收標準：參閱 `agent-a.md` 和 `technical-spec.md`
 - **M3（Agent B）**：Frontend 實作完成（由 Cloud Agent 在獨立分支實作）
   - 從 `public/deck.json` 載入並顯示卡片
-  - 檔案上傳、指令產生、重新載入功能
+  - 檔案上傳、參數調整 UI、API 呼叫、自動重新載入功能
   - 卡片瀏覽、統計、主題跳轉功能
   - 驗收標準：參閱 `agent-b.md` 和 `technical-spec.md`
 - **M4（整合）**：Merge A/B 分支到新的整合分支，完整流程驗證。（本 PRD 負責此階段）
-  - 端對端測試：上傳 → 執行 → 重新載入 → 顯示
-  - 驗證 JSON schema 一致性、編碼正確性、路徑正確性
+  - 端對端測試：啟動 Backend → 上傳檔案 → 調整參數 → 生成卡片 → 自動顯示
+  - 驗證 API 連接、CORS 設定、JSON schema 一致性、編碼正確性
   - 驗收標準：參閱下方「整合驗收」章節
 - **M5（發布）**：整合分支驗收通過後，merge 到 master。（視情況執行）
 
@@ -105,6 +109,7 @@
   - 初始資料準備：需將 `sampleDeck.ts` 轉存為 `public/deck.json` 作為初始範例資料
   - 環境差異：確保前後端都能在 Windows 本地環境正常啟動（在整合分支上測試）
   - 指令跳脫處理：Frontend 產生的指令需正確處理特殊字元（引號、換行等）
+  - API 連接問題：Frontend 需能成功呼叫 Backend API（CORS 設定、網路連接等）
   - 整合分支隔離：在整合分支上完成所有測試後，再 merge 到 master，避免破壞 master 的穩定性
 
 ## 驗收標準
@@ -115,11 +120,13 @@
 > 📋 **詳見**：`docs/prd/agent-a.md` 和 `technical-spec.md` - "Agent A 驗收（M2）" 章節
 
 簡要檢查：
-- ✅ 程式位置：`backend/main.py` 存在且可執行
-- ✅ 執行測試：`cd backend && uv run python main.py --text "..."` 成功
+- ✅ 程式位置：`backend/api.py` 存在且可執行
+- ✅ Server 啟動：`cd backend && uv run uvicorn api:app --reload` 成功啟動
+- ✅ API 測試：`POST http://127.0.0.1:8000/api/process` 可正常回應
 - ✅ 輸出驗證：自動產生 `frontend/public/deck.json`，格式正確、編碼無誤
-- ✅ Exit code：成功時 0，失敗時非 0
+- ✅ HTTP status code：成功時 200，參數錯誤 400，內部錯誤 500
 - ✅ 統計正確：stats 數值與實際數量一致
+- ✅ CORS 設定：允許前端 origin 呼叫 API
 
 ### Agent B 驗收（M3）
 > 📋 **詳見**：`docs/prd/agent-b.md` 和 `technical-spec.md` - "Agent B 驗收（M3）" 章節
@@ -128,37 +135,45 @@
 - ✅ 初始載入：`public/deck.json` 存在，啟動時能正常顯示卡片
 - ✅ 卡片瀏覽：翻卡、分頁、統計、主題跳轉功能正常
 - ✅ 檔案上傳：能上傳 `.txt` 或 `.md` 檔案，讀取內容為純文字字串
-- ✅ 指令產生：能產生正確的 Backend 執行指令（含跳脫字元處理）
-- ✅ 複製功能：「複製指令」按鈕能將指令複製到剪貼簿
-- ✅ 重新載入：「重新載入卡片」按鈕能重新 `fetch('/deck.json')` 並更新顯示
+- ✅ 參數調整：提供 threshold、maxTopics、maxBullets 等參數的輸入介面
+- ✅ API 呼叫：「生成卡片」按鈕能透過 HTTP POST 呼叫 Backend API
+- ✅ 自動重新載入：API 回應成功後自動重新載入並顯示新卡片
 - ✅ 錯誤處理：上傳非 `.txt`/`.md` 檔案時顯示清楚錯誤訊息
+- ✅ 載入狀態：處理中顯示 loading 狀態，完成後顯示結果或錯誤訊息
 
 ### 整合驗收（M4 - 本 PRD 負責）
 - **分支整合成功**：Agent A 和 Agent B 的分支已 merge 到新的整合分支，無衝突或衝突已解決
 - **初始資料準備**：`frontend/public/deck.json` 已存在（從 `sampleDeck.ts` 轉存），Frontend 啟動時能正常載入並顯示範例卡片
 - **Backend 獨立驗證**（在整合分支上執行）：
-  1. 執行 `cd backend && uv run python main.py --text "測試文字..."`
-  2. 確認 `frontend/public/deck.json` 成功產生並更新
-  3. 確認 JSON 格式符合 `frontend/src/types.ts` 的 `Deck` 型別
-  4. 確認 UTF-8 編碼正確，中文無亂碼
+  1. 執行 `cd backend && uv run uvicorn api:app --reload` 啟動 server
+  2. 使用 curl 或 Postman 測試 `POST http://127.0.0.1:8000/api/process`
+  3. 確認 API 回應成功（HTTP 200）並回傳正確的 JSON
+  4. 確認 `frontend/public/deck.json` 成功產生並更新
+  5. 確認 JSON 格式符合 `frontend/src/types.ts` 的 `Deck` 型別
+  6. 確認 UTF-8 編碼正確，中文無亂碼
 - **Frontend 獨立驗證**（在整合分支上執行）：
   1. Frontend 啟動後從 `public/deck.json` 載入資料
   2. 能正常翻卡、切換主題、查看統計
-  3. 上傳 `.txt` 或 `.md` 檔案後，能讀取內容並顯示
-  4. 能產生正確的 Backend 執行指令（含跳脫字元處理）
-  5. 「複製指令」和「重新載入卡片」按鈕功能正常
+  3. 上傳 `.txt` 或 `.md` 檔案後，能讀取內容為純文字
+  4. 參數調整介面能正常顯示並接受使用者輸入
+  5. UI 元件齊全：檔案上傳、參數調整、生成按鈕、載入狀態顯示
 - **端對端整合測試**（完整流程）：
-  1. Frontend 啟動，顯示初始範例卡片
-  2. 上傳真實的 `.md` 檔案（或貼上文字）
-  3. 複製 Frontend 產生的指令
-  4. 到終端手動執行該指令：`cd backend && uv run python main.py --text "..."`
-  5. 確認 Backend 執行成功（exit code 0）並更新 `deck.json`
-  6. 回到 Frontend 點擊「重新載入卡片」
-  7. 確認新卡片正確顯示，可以翻卡、查看統計
+  1. 啟動 Backend server：`cd backend && uv run uvicorn api:app --reload`
+  2. 啟動 Frontend：`cd frontend && npm run dev`
+  3. Frontend 啟動，顯示初始範例卡片
+  4. 上傳真實的 `.md` 檔案（或貼上文字）
+  5. 調整參數（threshold、maxTopics、maxBullets）
+  6. 點擊「生成卡片」按鈕
+  7. 確認顯示 loading 狀態
+  8. 確認 Backend API 成功處理並回應（檢查 Network tab）
+  9. 確認 Frontend 自動重新載入並顯示新卡片
+  10. 確認新卡片正確顯示，可以翻卡、查看統計
 - **錯誤處理驗證**：
   - 上傳非 `.txt`/`.md` 檔案，顯示清楚錯誤提示
-  - Backend 執行失敗時（exit code 非 0），錯誤訊息清楚
+  - Backend API 回應錯誤時（HTTP 4xx/5xx），Frontend 能顯示清楚錯誤訊息
+  - Backend server 未啟動時，Frontend 能捕捉連接錯誤並提示使用者
   - JSON 格式錯誤時，Frontend 能捕捉並提示
+  - 參數超出範圍時，顯示驗證錯誤
 - **準備 merge 到 master**：所有驗收通過後，整合分支可以安全地 merge 到 master
 
 > 📋 **更多測試案例與邊界條件**：請參閱 `technical-spec.md` - "整合驗收（M4）" 章節
