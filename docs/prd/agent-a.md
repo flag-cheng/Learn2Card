@@ -2,9 +2,10 @@
 
 ## 職責範圍
 **Agent A 僅負責 Backend（後端處理）**：
-- ✅ 接收純文字輸入（透過 CLI 參數 `--text`）
+- ✅ 提供 HTTP API 接收純文字輸入和處理參數
 - ✅ 執行文本分析與卡片生成邏輯
 - ✅ 輸出 JSON 到固定位置（`frontend/public/deck.json`）
+- ✅ 回傳處理結果給前端
 - ❌ **不負責** Frontend UI
 - ❌ **不負責** 檔案讀取（由 Agent B 處理）
 - ❌ **不負責** 使用者互動（由 Agent B 處理）
@@ -16,20 +17,23 @@
 > 📋 **請參閱**：技術棧與環境設定的完整規範請參考 `.cursor/rules/backend-rule.mdc`
 
 - **專案位置**：`backend/` 目錄
-- **技術棧**：Python 3.11+ + uv 套件管理器
+- **技術棧**：Python 3.11+ + FastAPI + uvicorn + uv 套件管理器
 - **輸入來源限制**：本模組僅接受**純文字字串**作為輸入，不處理檔案讀取、URL 抓取或任何 I/O 操作。檔案讀取應由呼叫方（如 Agent B）負責。
 
 ## 對外介面（與 Agent B 對接）
-> 📋 **詳細技術規範請參閱**：`docs/spec/technical-spec.md` - "Agent A：Backend CLI 介面規範" 章節
+> 📋 **詳細技術規範請參閱**：`docs/spec/technical-spec.md` - "Agent A：Backend API 介面規範" 章節
 
 ### 簡要說明
-- **程式位置**：`backend/main.py`
-- **執行方式**：`cd backend && uv run python main.py --text "輸入文字"`
-- **輸出位置**：固定輸出到 `frontend/public/deck.json`（UTF-8 編碼）
-- **輸出格式**：符合 `frontend/src/types.ts` 的 `Deck` 型別
-- **回傳值**：成功時 exit code 0，失敗時非 0
+- **實作方式**：FastAPI HTTP API server
+- **主程式位置**：`backend/api.py`（或 `main.py` 包含 FastAPI 路由）
+- **執行方式**：`cd backend && uv run uvicorn api:app --reload --host 127.0.0.1 --port 8000`
+- **API Endpoint**：`POST http://127.0.0.1:8000/api/process`
+- **Request Body**：JSON 格式，包含 `text`（必填）及可選參數（`topic_threshold`, `max_topics`, `max_bullets`, `debug`）
+- **Response**：JSON 格式，包含處理結果、統計資訊、完整 deck 資料
+- **副作用**：固定輸出到 `frontend/public/deck.json`（UTF-8 編碼）
+- **CORS 設定**：允許前端（`http://localhost:5173`）呼叫 API
 
-完整的 CLI 參數、執行範例、錯誤處理等技術細節，請參閱 technical-spec.md。
+完整的 API 規格、Request/Response Schema、錯誤處理等技術細節，請參閱 technical-spec.md。
 
 ## 功能需求
 
@@ -42,15 +46,15 @@
 6. **JSON 輸出**：寫入 `frontend/public/deck.json`（UTF-8 編碼，無 BOM）
 
 ### 參數化
-- 分群閾值（`--topic-threshold`，預設 0.75）
-- 最大主題數（`--max-topics`，預設 5）
-- 每卡摘要數上限（`--max-bullets`，預設 5）
-- 除錯模式（`--debug`）
+- 分群閾值（`topic_threshold`，預設 0.75）
+- 最大主題數（`max_topics`，預設 5）
+- 每卡摘要數上限（`max_bullets`，預設 5）
+- 除錯模式（`debug`，預設 false）
 
 ### 可測性
-提供 CLI 介面，能顯示中間結果（使用 `--debug` 參數）。
+提供 HTTP API 介面，支援除錯模式（`debug: true`）輸出中間結果。
 
-> 📋 **技術細節**：完整的參數說明、處理流程、錯誤處理規範請參閱 `technical-spec.md` - "Agent A：Backend CLI 介面規範" 章節
+> 📋 **技術細節**：完整的參數說明、處理流程、錯誤處理規範請參閱 `technical-spec.md` - "Agent A：Backend API 介面規範" 章節
 
 ## 非功能需求
 - **效能**：5k tokens 級別可在合理時間內完成
@@ -64,32 +68,36 @@
 ### 本模組特定限制
 
 #### 必須遵守
-- **輸入介面**：CLI 的 `--text` 參數必須接受**純文字字串**，不接受檔案路徑或 URL
-- **檔案讀取**：本模組不負責讀取輸入檔案，檔案讀取由呼叫方處理
+- **輸入介面**：API 的 `text` 欄位必須接受**純文字字串**，不接受檔案路徑或 URL
+- **檔案讀取**：本模組不負責讀取輸入檔案，檔案讀取由呼叫方（Agent B）處理
 - **檔案寫入**：固定輸出到 `frontend/public/deck.json`，使用 UTF-8 編碼（無 BOM）
 - **輸出格式**：必須輸出符合 `frontend/src/types.ts` 的 `Deck` 型別，確保 deterministic 排序
 - **目錄建立**：若 `frontend/public/` 目錄不存在，應自動建立
+- **CORS 設定**：必須設定 CORS 允許前端 origin（`http://localhost:5173`, `http://127.0.0.1:5173`）
+- **API 規格**：使用 Pydantic models 定義 Request/Response schema，提供明確的欄位驗證
 
 #### 不得實作
 - ❌ 不得在核心管線中處理**輸入檔案讀取**、URL 抓取或其他輸入 I/O 操作
 - ❌ 不得假設輸入來源（讓呼叫方決定如何取得文字）
 - ❌ 不得在未經明確需求的情況下新增額外 LLM 提供者或 embedding 模型
 - ❌ 不得使用非 UTF-8 編碼輸出檔案（避免中文亂碼）
-- ❌ **不得提供 `--output` 或 `-o` 參數**（輸出位置固定為 `frontend/public/deck.json`）
-- ❌ **不得支援 stdout 輸出或管道操作**（避免複雜化）
-- ❌ **不得提供自訂輸出路徑功能**（避免浪費 token 實作不必要的彈性）
+- ❌ **不得提供自訂輸出路徑參數**（輸出位置固定為 `frontend/public/deck.json`）
+- ❌ **不得實作檔案上傳 endpoint**（檔案讀取由前端處理，只接收純文字）
+- ❌ **不得實作認證或授權機制**（僅限本地開發使用，避免複雜化）
 
 ## 驗收標準
 
 > 📋 **詳細驗收標準請參閱**：`technical-spec.md` - "Agent A 驗收（M2）" 章節
 
 ### 對外介面驗證（與 Agent B 對接）
-- ✅ 程式位置：`backend/main.py` 存在且可執行
-- ✅ 指令格式：`cd backend && uv run python main.py --text "..."` 能正常執行
-- ✅ 必要參數：`--text` 參數必須存在且為必填
-- ✅ 輸出位置：執行後固定產生 `frontend/public/deck.json`
-- ✅ Exit code：成功時回傳 0，失敗時回傳非 0
-- ✅ 錯誤訊息：失敗時在 stderr 輸出明確的錯誤訊息
+- ✅ API server 能正常啟動：`cd backend && uv run uvicorn api:app --reload`
+- ✅ API endpoint 存在：`POST http://127.0.0.1:8000/api/process`
+- ✅ Request 格式正確：接收 JSON body 包含 `text` 欄位（必填）和可選參數
+- ✅ 必要參數驗證：`text` 欄位為空時回傳 400 錯誤
+- ✅ 輸出位置：處理成功後固定產生 `frontend/public/deck.json`
+- ✅ HTTP status code：成功時 200，參數錯誤 400，內部錯誤 500
+- ✅ 錯誤訊息：失敗時在 Response body 回傳明確的錯誤訊息
+- ✅ CORS 設定：前端能成功呼叫 API（無跨域錯誤）
 
 ### 輸出品質
 - ✅ JSON 格式符合 `frontend/src/types.ts` 的 `Deck` 型別
@@ -103,9 +111,10 @@
 - ✅ 分群結果可讀，卡片 bullets 1–5 條（目標 3–5）
 
 ### 限制確認
-- ✅ 確認無 `--output` 參數或 `-o` 選項（輸出位置固定）
-- ✅ 確認無 stdout JSON 輸出（避免不必要的實作）
-- ✅ CLI 不涉及輸入檔案讀取（輸入透過 `--text` 參數傳入純文字字串）
+- ✅ 確認無自訂輸出路徑參數（輸出位置固定）
+- ✅ 確認無檔案上傳 endpoint（只接收純文字字串）
+- ✅ 確認無認證機制（本地開發用，保持簡單）
+- ✅ API 不涉及輸入檔案讀取（輸入透過 request body 的 `text` 欄位傳入純文字字串）
 
 > 📋 **更多細節**：完整的驗收檢查清單、測試用例、邊界條件處理請參閱 `technical-spec.md`
 
@@ -116,8 +125,8 @@
 - **編碼問題**：強制使用 UTF-8 編碼，在 Windows 環境下測試中文處理
 
 ## 與其他模組的關係
-- **輸入來源**：由 Agent B（Frontend）讀取檔案後傳入
-- **輸出目標**：產生的 `deck.json` 由 Agent B（Frontend）載入顯示
-- **整合方式**：Agent B 產生執行指令 → 使用者手動執行 → Agent A 更新 `deck.json` → Agent B 重新載入
+- **輸入來源**：由 Agent B（Frontend）讀取檔案後透過 HTTP API 傳入
+- **輸出目標**：產生的 `deck.json` 由 Agent B（Frontend）重新載入顯示
+- **整合方式**：Agent B 呼叫 API → Agent A 處理並更新 `deck.json` → 回傳結果 → Agent B 重新載入並顯示
 
 > 📋 **整合流程詳見**：`docs/prd/global.md` - "整合任務" 章節

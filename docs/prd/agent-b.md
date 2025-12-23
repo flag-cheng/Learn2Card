@@ -5,14 +5,14 @@
 - ✅ 提供 UI 讓使用者上傳檔案或輸入文字
 - ✅ 提供 UI 讓使用者調整 Backend 參數
 - ✅ 讀取檔案內容（使用 FileReader API）
-- ✅ 產生並顯示 Backend 執行指令
+- ✅ 透過 HTTP API 呼叫 Backend 處理文字
 - ✅ 載入並顯示 `public/deck.json` 的卡片資料
 - ✅ 提供卡片瀏覽、統計、主題跳轉功能
 - ❌ **不負責** 文本分析邏輯（由 Agent A 處理）
 - ❌ **不負責** 卡片生成演算法（由 Agent A 處理）
 
 ## 使命
-提供簡單 Web 介面讓使用者輸入文字、調整參數、觸發 Agent A（Backend）處理，並載入展示生成的卡片，支援分頁/序列翻卡、主題瀏覽與統計展示。
+提供簡單 Web 介面讓使用者輸入文字、調整參數、透過 HTTP API 觸發 Agent A（Backend）處理，並自動載入展示生成的卡片，支援分頁/序列翻卡、主題瀏覽與統計展示。
 
 ## 技術棧與環境
 > 📋 **請參閱**：技術棧與環境設定的完整規範請參考 `.cursor/rules/frontend-rule.mdc`
@@ -39,32 +39,32 @@
 ## Backend 整合方式（與 Agent A 對接）
 > 📋 **詳細技術規範請參閱**：`technical-spec.md` - "Agent B：Frontend 整合規範" 章節
 
-### 簡要說明（採用方案 A：簡易 Demo 版）
+### 簡要說明（HTTP API 整合）
 
 **資料流程**：
 ```
-使用者上傳檔案 
+使用者上傳檔案或輸入文字
   ↓
 Frontend 讀取內容（純文字）
   ↓
-Frontend 產生可執行指令：cd backend && uv run python main.py --text "..."
+使用者調整參數（threshold, maxTopics, maxBullets 等）
   ↓
-使用者複製指令並手動到終端執行
+點擊「生成卡片」按鈕
   ↓
-Backend 執行完成，更新 frontend/public/deck.json
+Frontend 透過 HTTP POST 呼叫 Backend API
   ↓
-使用者點擊「重新載入卡片」按鈕
+Backend 執行處理，更新 frontend/public/deck.json，回傳結果
   ↓
-Frontend 重新 fetch('/deck.json') 並顯示新卡片
+Frontend 自動重新載入並顯示新卡片
 ```
 
-**為什麼採用方案 A**：
-- ✅ 瀏覽器無法直接執行系統指令
-- ✅ 避免建立額外的 HTTP API server（會大幅增加複雜度）
-- ✅ 保持簡單，符合 Demo 用途
-- ✅ 兩個 Agent 可以獨立開發，不需要額外的 API 協調
+**整合方式說明**：
+- ✅ Backend 提供 FastAPI HTTP API（`POST http://127.0.0.1:8000/api/process`）
+- ✅ Frontend 透過 `fetch()` 直接呼叫 API，無需手動複製指令
+- ✅ 使用者在 UI 中調整參數，點擊按鈕即可觸發處理
+- ✅ 處理完成後自動更新顯示，使用者體驗流暢
 
-> 📋 **完整資料流、技術細節（字元跳脫、路徑處理等）請參閱**：`technical-spec.md` - "資料流程" 和 "技術細節" 章節
+> 📋 **完整資料流、API 規格、錯誤處理等技術細節請參閱**：`technical-spec.md` - "資料流程" 和 "Agent B：Frontend 整合規範" 章節
 
 ## 功能需求
 
@@ -84,73 +84,64 @@ Frontend 重新 fetch('/deck.json') 並顯示新卡片
 ### 3. Backend 參數輸入介面
 提供 UI 讓使用者調整 Backend 的處理參數（全部使用預設值也可以）：
 
-- **分群閾值**（`--topic-threshold`）：
+- **分群閾值**（`topic_threshold`）：
   - 預設值：0.75
   - 範圍：0.0–1.0
   - UI：滑桿（slider）或數字輸入框
   - 說明：「相似度閾值，數值越高分群越細」
   
-- **最大主題數**（`--max-topics`）：
+- **最大主題數**（`max_topics`）：
   - 預設值：5
   - 範圍：1–10
   - UI：數字輸入框或下拉選單
   - 說明：「最多產生幾個主題」
   
-- **每卡摘要數**（`--max-bullets`）：
+- **每卡摘要數**（`max_bullets`）：
   - 預設值：5
   - 範圍：1–5
   - UI：數字輸入框或下拉選單
   - 說明：「每張卡片最多幾個要點」
   
-- **除錯模式**（`--debug`）：
+- **除錯模式**（`debug`）：
   - 預設值：false（不開啟）
   - UI：勾選框（checkbox）
   - 說明：「顯示詳細的處理資訊」
 
-### 4. Backend 指令產生
-- 將使用者輸入的文字進行跳脫處理（處理引號、換行、特殊字元）
-- **根據使用者選擇的參數**組裝可執行的 Backend 指令：
-  ```bash
-  cd backend && uv run python main.py --text "使用者的文字" --topic-threshold 0.75 --max-topics 5 --max-bullets 5
-  ```
-- 如果使用者勾選除錯模式，加上 `--debug`
-- 如果使用者使用預設值，可省略該參數（Backend 會自動使用預設值）
-- 顯示在畫面上供使用者查看
+### 4. 生成卡片功能
+- 提供「生成卡片」按鈕
+- 點擊後：
+  1. 顯示載入中狀態（spinner 或進度提示）
+  2. 將文字內容和參數透過 HTTP POST 送到 Backend API
+  3. 等待 Backend 處理完成
+  4. 自動重新載入 `deck.json` 並更新顯示
+  5. 顯示成功訊息（例如：「已成功產生 6 張卡片」）
+- 錯誤處理：
+  - Backend 未啟動：顯示「無法連接到 Backend，請確認 Backend 服務已啟動」
+  - 處理失敗：顯示 Backend 回傳的錯誤訊息
+  - 網路錯誤：顯示「網路連接失敗，請檢查網路狀態」
 
-### 5. 複製與執行提示
-- 提供「複製指令」按鈕，點擊後複製到剪貼簿
-- 顯示明確的操作步驟：
-  1. 點擊「複製指令」
-  2. 開啟終端
-  3. 貼上並執行指令
-  4. 執行完成後，點擊下方「重新載入卡片」按鈕
-
-### 6. 重新載入功能
-- 提供「重新載入卡片」按鈕
-- 點擊後重新執行 `fetch('/deck.json')`
-- 解析 JSON 並更新顯示
-- 顯示載入中狀態
-
-### 7. 卡片瀏覽
+### 6. 卡片瀏覽
 - 上一張/下一張按鈕
 - 分頁或序列瀏覽模式
 - 鍵盤左右鍵快捷操作
 
-### 8. 統計展示
+### 7. 統計展示
 - 同步顯示段落/主題/卡片數（使用 `stats.paragraphCount`、`stats.topicCount`、`stats.cardCount`）
 
-### 9. 主題跳轉
+### 8. 主題跳轉
 - 依 topic 過濾/跳轉卡片
 - 顯示主題標題
 
-### 10. 錯誤處理
+### 5. 錯誤處理
 - 檔案格式驗證：若上傳非 txt/md 檔案，顯示明確錯誤訊息
 - JSON schema 驗證：載入的 JSON 格式錯誤時提供可讀提示
 - 空內容處理：文字為空或無效時的友善提示
-- Fetch 失敗處理：檔案不存在時的提示
+- API 連接失敗：Backend 未啟動或無法連接時的提示
+- Backend 錯誤：顯示 Backend 回傳的錯誤訊息
 - 參數驗證：若使用者輸入的參數超出範圍，顯示提示並使用預設值
+- 網路逾時：處理請求超時的情況並提供重試選項
 
-### 11. UI 設計
+### 6. UI 設計
 - 簡潔、可讀，行高、對比度足夠
 - 適合 Windows 桌面瀏覽器（Chrome/Edge）
 
@@ -174,20 +165,21 @@ Frontend 重新 fetch('/deck.json') 並顯示新卡片
 - **輸入格式**：只接受 `.txt` 和 `.md` 檔案上傳，或純文字貼上
 - **檔案驗證**：上傳時檢查副檔名，非 txt/md 要明確拒絕並顯示錯誤訊息
 - **檔案讀取**：使用 FileReader API 讀取 `.txt` 或 `.md` 檔案內容為純文字字串
-- **文字處理**：將純文字字串用於產生 Backend 執行指令（需跳脫特殊字元）
+- **API 呼叫**：使用 `fetch()` API 透過 HTTP POST 將文字和參數傳送到 Backend
 - **資料來源**：從 `public/deck.json` 載入卡片資料，**不從** `sampleDeck.ts` 讀取
 - **初始資料**：專案初始化時，需將 `sampleDeck.ts` 的範例資料轉存為 `public/deck.json`
 - **UI 元件**：使用 `<input type="file" accept=".txt,.md">` 限制檔案選擇器
+- **API Endpoint**：使用 `POST http://127.0.0.1:8000/api/process`，Content-Type 為 `application/json`
+- **錯誤顯示**：處理 HTTP 4xx/5xx 錯誤，顯示清楚的使用者訊息
 
 #### 不得實作
 - ❌ 不得提供 URL 輸入欄位
 - ❌ 不得實作網頁抓取、爬蟲或任何 URL 內容讀取功能
 - ❌ 不得支援 PDF、DOCX、HTML 等其他檔案格式（僅限 txt/md）
 - ❌ 不得從 `sampleDeck.ts` 動態讀取資料（應從 `public/deck.json` 讀取）
-- ❌ 不得在前端直接處理文字分析邏輯（必須透過 Backend 處理）
-- ❌ **不得嘗試在瀏覽器中執行系統指令**（如 child_process、exec 等，瀏覽器做不到）
-- ❌ **不得實作 HTTP API 呼叫或 server**（除非明確要求方案 B，目前採用方案 A）
-- ❌ 不得使用 WebSocket、Server-Sent Events 等複雜的即時通訊（保持簡單）
+- ❌ 不得在前端直接處理文字分析邏輯（必須透過 Backend API 處理）
+- ❌ 不得在 UI 中顯示終端指令讓使用者複製（應直接呼叫 API）
+- ❌ 不得使用 WebSocket、Server-Sent Events 等複雜的即時通訊（使用簡單的 HTTP POST 即可）
 
 ## 驗收標準
 
@@ -208,22 +200,23 @@ Frontend 重新 fetch('/deck.json') 並顯示新卡片
 - ✅ 提供參數輸入介面（分群閾值、最大主題數、每卡摘要數、除錯模式）
 - ✅ 所有參數都有明確的預設值，使用者可選擇性修改
 - ✅ 參數範圍驗證正確（閾值 0.0–1.0，主題數 1–10，摘要數 1–5）
-- ✅ 能根據使用者選擇的參數產生正確的 Backend 執行指令（含跳脫字元處理）
-- ✅ 「複製指令」按鈕能將完整指令（含參數）複製到剪貼簿
-- ✅ 顯示明確的執行步驟提示
-- ✅ 「重新載入卡片」按鈕能重新 `fetch('/deck.json')` 並更新顯示
+- ✅ 「生成卡片」按鈕能將文字和參數透過 HTTP POST 送到 Backend API
+- ✅ 顯示載入中狀態，處理完成後自動更新顯示
+- ✅ 顯示處理結果訊息（成功或失敗）
 
 ### 整合測試
 - ✅ 完整流程測試：
-  1. 上傳測試檔案 → 產生指令
-  2. 複製指令 → 手動執行 Backend
-  3. 點擊重新載入 → 顯示新卡片
-  4. 整個流程能順利完成，新卡片正確顯示
+  1. 確認 Backend API server 已啟動（`http://127.0.0.1:8000`）
+  2. 上傳測試檔案或輸入文字 → 調整參數 → 點擊「生成卡片」
+  3. 顯示載入中狀態 → Backend 處理完成
+  4. 自動更新顯示 → 新卡片正確顯示
+  5. 整個流程順暢，無需手動複製指令或重新載入
 
 ### 錯誤處理
 - ✅ 各種異常情況都有清楚的使用者提示
 - ✅ **確認無 URL 輸入欄位**，不支援網頁抓取功能
-- ✅ **確認無 HTTP API 呼叫或系統指令執行**（採用簡易方案 A）
+- ✅ **確認無終端指令複製區**（直接呼叫 API，不需要使用者手動執行指令）
+- ✅ Backend 連接失敗時有明確提示
 
 > 📋 **更多測試案例**：邊界條件、錯誤處理、瀏覽器相容性測試請參閱 `technical-spec.md`
 
@@ -231,11 +224,12 @@ Frontend 重新 fetch('/deck.json') 並顯示新卡片
 - **JSON 版本差異**：固定 schema，必要時增加向後相容映射
 - **大檔渲染**：使用分頁/虛擬列表策略，顯示 loading
 - **瀏覽器差異**：優先桌面 Chrome/Edge，明確標示支援範圍
-- **字元跳脫問題**：完整測試特殊字元（引號、換行、反斜線等）的處理
+- **API 連接問題**：Backend 未啟動或網路問題，提供清楚的錯誤提示和重試機制
+- **CORS 問題**：確保 Backend 正確設定 CORS，允許前端 origin
 
 ## 與其他模組的關係
 - **資料來源**：從 Agent A 產生的 `public/deck.json` 讀取資料
-- **輸入處理**：讀取檔案內容後，產生指令供使用者執行 Agent A
-- **整合方式**：不直接呼叫 Agent A，而是產生指令讓使用者手動執行
+- **輸入處理**：讀取檔案內容後，透過 HTTP API 呼叫 Agent A 進行處理
+- **整合方式**：直接呼叫 Agent A 的 FastAPI endpoint（`POST http://127.0.0.1:8000/api/process`）
 
 > 📋 **整合流程詳見**：`docs/prd/global.md` - "整合任務" 章節
