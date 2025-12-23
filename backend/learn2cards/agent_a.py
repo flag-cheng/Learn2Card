@@ -6,6 +6,7 @@ import json
 import re
 import sys
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Literal
 
 from pydantic import BaseModel, Field
@@ -504,7 +505,7 @@ def generate_deck(
 def _parse_args(argv: list[str]) -> argparse.Namespace:
     p = argparse.ArgumentParser(
         prog="agent-a",
-        description="Agent A: 文本→段落→摘要/關鍵詞→語意分群→卡片草稿→Deck JSON（不做檔案 I/O）",
+        description="Agent A: 文本→段落→摘要/關鍵詞→語意分群→卡片草稿→Deck JSON（固定輸出到 frontend/public/deck.json）",
     )
     p.add_argument(
         "--text",
@@ -526,7 +527,22 @@ def main(argv: list[str] | None = None) -> int:
         maxBulletsPerCard=max(1, min(5, args.max_bullets)),
     )
     deck = generate_deck(args.text, options=options, debug=args.debug)
-    print(json.dumps(deck.model_dump(), ensure_ascii=False, sort_keys=True, indent=2))
+    deck_json = json.dumps(deck.model_dump(), ensure_ascii=False, sort_keys=True, indent=2)
+    
+    # 判斷是否輸出到 stdout
+    if args.output in ("-", "stdout"):
+        # 輸出到 stdout（方便管道操作）
+        print(deck_json)
+    else:
+        # 寫入檔案（自動建立目錄）
+        output_path = Path(args.output)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        output_path.write_text(deck_json, encoding="utf-8")
+        print(f"✓ 已成功輸出到：{output_path.absolute()}", file=sys.stderr)
+        print(f"  - 段落數：{deck.stats.paragraphCount}", file=sys.stderr)
+        print(f"  - 主題數：{deck.stats.topicCount}", file=sys.stderr)
+        print(f"  - 卡片數：{deck.stats.cardCount}", file=sys.stderr)
+    
     return 0
 
 
