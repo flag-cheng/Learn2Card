@@ -95,7 +95,8 @@ function parseDeck(value: unknown): Deck {
     );
   }
 
-  return value as Deck;
+  // 已在上方逐欄位做 runtime 檢查，這裡再做型別收斂即可。
+  return value as unknown as Deck;
 }
 
 function clamp(n: number, min: number, max: number): number {
