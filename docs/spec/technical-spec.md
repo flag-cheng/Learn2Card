@@ -252,20 +252,43 @@ cd backend && uv run python main.py --text "輸入的純文字內容"
    - 提供多行文字輸入框（`<textarea>`）
    - 讓使用者直接貼上純文字內容
 
-3. **指令產生**：
+3. **Backend 參數輸入介面**：
+   - 提供 UI 元件讓使用者調整以下參數：
+     - **分群閾值**（`--topic-threshold`）：
+       - 預設：0.75
+       - 範圍：0.0–1.0（步進 0.05）
+       - 建議 UI：滑桿 + 數字顯示
+     - **最大主題數**（`--max-topics`）：
+       - 預設：5
+       - 範圍：1–10
+       - 建議 UI：數字輸入框或下拉選單
+     - **每卡摘要數**（`--max-bullets`）：
+       - 預設：5
+       - 範圍：1–5
+       - 建議 UI：數字輸入框或下拉選單
+     - **除錯模式**（`--debug`）：
+       - 預設：false
+       - 建議 UI：勾選框（checkbox）
+   - 所有參數都應有明確的說明文字
+   - 所有參數都應有預設值，使用者可選擇性修改
+   - 參數驗證：超出範圍時顯示錯誤並使用預設值
+
+4. **指令產生**：
    - 將使用者輸入的文字進行跳脫處理（處理引號、換行、特殊字元）
-   - 產生可執行的指令字串：
+   - 根據使用者選擇的參數組裝可執行的指令字串：
      ```bash
-     cd backend && uv run python main.py --text "使用者的文字內容"
+     cd backend && uv run python main.py --text "使用者的文字內容" --topic-threshold 0.75 --max-topics 5 --max-bullets 5
      ```
+   - 如果參數使用預設值，可省略該參數（Backend 會自動使用預設值）
+   - 如果勾選除錯模式，在指令最後加上 `--debug`
    - 顯示在畫面上供使用者查看
 
-4. **複製指令**：
+5. **複製指令**：
    - 提供「複製指令」按鈕
-   - 點擊後複製到剪貼簿（使用 `navigator.clipboard.writeText()`）
+   - 點擊後複製完整指令（含所有參數）到剪貼簿（使用 `navigator.clipboard.writeText()`）
    - 顯示複製成功提示
 
-5. **執行提示**：
+6. **執行提示**：
    - 顯示明確的操作步驟：
      ```
      1. 點擊「複製指令」
@@ -274,23 +297,23 @@ cd backend && uv run python main.py --text "輸入的純文字內容"
      4. 執行完成後，點擊下方「重新載入卡片」按鈕
      ```
 
-6. **重新載入**：
+7. **重新載入**：
    - 提供「重新載入卡片」按鈕
    - 點擊後重新執行 `fetch('/deck.json')`
    - 解析 JSON 並更新顯示
 
-7. **卡片瀏覽**：
+8. **卡片瀏覽**：
    - 上一張/下一張按鈕
    - 鍵盤左右鍵快捷
    - 分頁或序列瀏覽模式
 
-8. **統計展示**：
+9. **統計展示**：
    - 顯示 `stats.paragraphCount`、`stats.topicCount`、`stats.cardCount`
 
-9. **主題跳轉**：
+10. **主題跳轉**：
    - 依 topic 篩選或跳轉卡片
 
-10. **錯誤處理**：
+11. **錯誤處理**：
     - 檔案格式錯誤提示
     - JSON 解析失敗提示
     - `fetch` 失敗提示（檔案不存在）
@@ -342,8 +365,11 @@ cd backend && uv run python main.py --text "輸入的純文字內容"
 - ✅ 卡片瀏覽：翻卡、分頁、統計、主題跳轉功能正常
 - ✅ 檔案上傳：能上傳 `.txt` 或 `.md` 檔案，讀取內容為純文字
 - ✅ 文字輸入：能在文字框貼上純文字
-- ✅ 指令產生：能產生正確的 Backend 執行指令（含跳脫字元處理）
-- ✅ 複製功能：「複製指令」按鈕能複製到剪貼簿
+- ✅ 參數輸入：提供分群閾值、最大主題數、每卡摘要數、除錯模式的輸入介面
+- ✅ 參數預設值：所有參數都有明確的預設值顯示
+- ✅ 參數驗證：參數範圍驗證正確，超出範圍時顯示提示
+- ✅ 指令產生：能根據使用者選擇的參數產生正確的 Backend 執行指令（含跳脫字元處理）
+- ✅ 複製功能：「複製指令」按鈕能複製完整指令（含所有參數）到剪貼簿
 - ✅ 重新載入：「重新載入卡片」按鈕能重新載入並顯示
 - ✅ 錯誤處理：上傳非 txt/md 檔案時顯示錯誤訊息
 
@@ -370,6 +396,67 @@ cd backend && uv run python main.py --text "輸入的純文字內容"
 - **檔案編碼**：UTF-8（無 BOM）
 - **換行符號**：LF（建議），Windows CRLF 也支援
 - **JSON 格式**：縮排 2 空格，`ensure_ascii=False`，`sort_keys=True`
+
+### UI 介面範例（Agent B 參數輸入）
+
+建議的參數輸入介面佈局：
+
+```
+┌─────────────────────────────────────┐
+│ 📄 上傳檔案或輸入文字                │
+├─────────────────────────────────────┤
+│ [選擇檔案] 或 [文字輸入框]           │
+│                                     │
+│ ⚙️ Backend 處理參數（可選）          │
+├─────────────────────────────────────┤
+│ 分群閾值: [====●====] 0.75         │
+│          (數值越高分群越細)          │
+│                                     │
+│ 最大主題數: [5 ▼] (1-10)           │
+│                                     │
+│ 每卡摘要數: [5 ▼] (1-5)            │
+│                                     │
+│ □ 除錯模式 (顯示詳細處理資訊)       │
+│                                     │
+│ [產生指令]                          │
+├─────────────────────────────────────┤
+│ 📋 執行指令：                        │
+│ cd backend && uv run python ...     │
+│                                     │
+│ [複製指令] [重新載入卡片]           │
+└─────────────────────────────────────┘
+```
+
+### 指令組裝邏輯（Agent B）
+
+```typescript
+function generateCommand(
+  text: string,
+  topicThreshold: number = 0.75,
+  maxTopics: number = 5,
+  maxBullets: number = 5,
+  debug: boolean = false
+): string {
+  const escapedText = escapeShellArg(text);
+  let command = `cd backend && uv run python main.py --text "${escapedText}"`;
+  
+  // 只有當參數不是預設值時才加入
+  if (topicThreshold !== 0.75) {
+    command += ` --topic-threshold ${topicThreshold}`;
+  }
+  if (maxTopics !== 5) {
+    command += ` --max-topics ${maxTopics}`;
+  }
+  if (maxBullets !== 5) {
+    command += ` --max-bullets ${maxBullets}`;
+  }
+  if (debug) {
+    command += ` --debug`;
+  }
+  
+  return command;
+}
+```
 
 ### 字元跳脫處理（Agent B）
 

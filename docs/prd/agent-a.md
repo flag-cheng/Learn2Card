@@ -1,7 +1,16 @@
-# Agent A PRD：核心 NLP/LLM 管線
+# Agent A PRD：核心 NLP/LLM 管線（Backend 專責）
+
+## 職責範圍
+**Agent A 僅負責 Backend（後端處理）**：
+- ✅ 接收純文字輸入（透過 CLI 參數 `--text`）
+- ✅ 執行文本分析與卡片生成邏輯
+- ✅ 輸出 JSON 到固定位置（`frontend/public/deck.json`）
+- ❌ **不負責** Frontend UI
+- ❌ **不負責** 檔案讀取（由 Agent B 處理）
+- ❌ **不負責** 使用者互動（由 Agent B 處理）
 
 ## 使命
-實作從「文件→段落→重點/關鍵詞→語意分群→卡片草稿→統計」的核心演算法/LLM 流程，輸出穩定 JSON，供其他模組使用。
+實作從「文件→段落→重點/關鍵詞→語意分群→卡片草稿→統計」的核心演算法/LLM 流程，輸出穩定 JSON，供 Agent B（Frontend）使用。
 
 ## 技術棧與環境
 > 📋 **請參閱**：技術棧與環境設定的完整規範請參考 `.cursor/rules/backend-rule.mdc`
