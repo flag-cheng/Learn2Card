@@ -243,7 +243,10 @@ const App = () => {
   }, [totalVisibleInMode]);
 
   const handlePrev = () => {
+    if (totalCards === 0) return;
+
     if (browseMode === "sequence") {
+      if (currentCardIndex === 0) return;
       setCurrentCardIndex((prev) => Math.max(prev - 1, 0));
       return;
     }
@@ -261,7 +264,10 @@ const App = () => {
   };
 
   const handleNext = () => {
+    if (totalCards === 0) return;
+
     if (browseMode === "sequence") {
+      if (currentCardIndex >= totalCards - 1) return;
       setCurrentCardIndex((prev) => Math.min(prev + 1, totalCards - 1));
       return;
     }
@@ -291,11 +297,11 @@ const App = () => {
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (isTextInputElement(event.target)) return;
-      if (event.key === "ArrowLeft") {
+      if (event.key === "ArrowLeft" && !disablePrev) {
         event.preventDefault();
         handlePrev();
       }
-      if (event.key === "ArrowRight") {
+      if (event.key === "ArrowRight" && !disableNext) {
         event.preventDefault();
         handleNext();
       }
@@ -303,7 +309,7 @@ const App = () => {
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [handleNext, handlePrev]);
+  }, [handleNext, handlePrev, disablePrev, disableNext]);
 
   const normalizeParams = useCallback(() => {
     const normalizedThreshold = clamp(topicThreshold, 0, 1);
