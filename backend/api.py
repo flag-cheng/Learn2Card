@@ -151,8 +151,19 @@ def request_validation_exception_handler(_, exc: RequestValidationError):
         errs = exc.errors()
         if errs:
             first = errs[0]
-            if isinstance(first, dict) and isinstance(first.get("msg"), str):
-                msg = first["msg"]
+            if isinstance(first, dict):
+                # Pydantic v2 "missing" (required field) handling
+                if first.get("type") == "missing":
+                    loc = first.get("loc")
+                    if isinstance(loc, (list, tuple)) and loc and loc[-1] == "text":
+                        msg = "text 為必填欄位"
+                        return fastapi_json(400, {"ok": False, "error": msg})
+
+                raw_msg = first.get("msg")
+                if isinstance(raw_msg, str) and raw_msg:
+                    # Normalize "Value error, <message>" into "<message>"
+                    prefix = "Value error, "
+                    msg = raw_msg[len(prefix) :] if raw_msg.startswith(prefix) else raw_msg
     except Exception:
         pass
     return fastapi_json(400, {"ok": False, "error": msg})
