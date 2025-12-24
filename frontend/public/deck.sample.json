@@ -1,0 +1,117 @@
+{
+  "meta": {
+    "source": "deck.sample.json",
+    "generatedAt": "2025-12-20T00:00:00.000Z",
+    "schemaVersion": "1.0.0"
+  },
+  "paragraphs": [
+    {
+      "id": "p1",
+      "idx": 0,
+      "text": "專案目標是把長文轉成一疊可翻閱的卡片，方便快速掌握重點。",
+      "headingLevel": 1,
+      "sectionPath": ["產品概念"]
+    },
+    {
+      "id": "p2",
+      "idx": 1,
+      "text": "P0 階段只需前端 UI shell，採用 React + TypeScript 搭配內建假資料。",
+      "headingLevel": 2,
+      "sectionPath": ["產品概念", "P0"]
+    },
+    {
+      "id": "p3",
+      "idx": 2,
+      "text": "畫面包含標題列、左側統計與主題列表，以及右側卡片檢視區。",
+      "headingLevel": 2,
+      "sectionPath": ["介面布局"]
+    },
+    {
+      "id": "p4",
+      "idx": 3,
+      "text": "卡片需要支援上一張與下一張按鈕，並根據主題切換可見卡片。",
+      "headingLevel": 2,
+      "sectionPath": ["互動邏輯"]
+    },
+    {
+      "id": "p5",
+      "idx": 4,
+      "text": "未來會改成讀取 deck.json，現階段只需確保 deck.sample.json 可以 demo。",
+      "headingLevel": 2,
+      "sectionPath": ["互動邏輯", "資料接線"]
+    }
+  ],
+  "keypoints": [
+    {
+      "paragraphId": "p1",
+      "sentence": "將長文整理成可翻閱的卡片組，提升瀏覽效率。",
+      "keywords": ["摘要", "卡片化", "效率"]
+    },
+    {
+      "paragraphId": "p2",
+      "sentence": "P0 先以 React + TypeScript 的 UI shell 搭配假資料示範。",
+      "keywords": ["P0", "React", "假資料"]
+    },
+    {
+      "paragraphId": "p3",
+      "sentence": "介面由標題列、側欄（統計/主題）與卡片檢視區構成。",
+      "keywords": ["版面", "統計", "主題"]
+    },
+    {
+      "paragraphId": "p4",
+      "sentence": "需支援翻卡與依主題切換可見卡片的互動。",
+      "keywords": ["互動", "翻卡", "篩選"]
+    },
+    {
+      "paragraphId": "p5",
+      "sentence": "後續會以 deck.json 取代 sample，UI 只需切換來源即可。",
+      "keywords": ["deck.json", "接入", "示範"]
+    }
+  ],
+  "topics": [
+    {
+      "id": "t1",
+      "title": "產品概念",
+      "memberIds": ["p1", "p2"],
+      "summaryBullets": ["長文轉卡片以快速掌握重點", "P0 先做 UI shell 再接 deck.json"]
+    },
+    {
+      "id": "t2",
+      "title": "介面布局",
+      "memberIds": ["p3"],
+      "summaryBullets": ["左側統計/主題列表", "右側卡片檢視與翻卡"]
+    },
+    {
+      "id": "t3",
+      "title": "互動邏輯",
+      "memberIds": ["p4", "p5"],
+      "summaryBullets": ["上一張/下一張與鍵盤左右鍵", "可切換 topic 與分頁瀏覽"]
+    }
+  ],
+  "cards": [
+    {
+      "id": "c1",
+      "topicId": "t1",
+      "title": "文件歸納切卡機目標",
+      "bullets": ["將長文整理成可翻閱的卡片組", "提升閱讀與分享效率", "P0 先用 sample 驗收，再接 deck.json"]
+    },
+    {
+      "id": "c2",
+      "topicId": "t2",
+      "title": "UI shell 版面",
+      "bullets": ["頂部顯示標題與資料來源", "左側呈現統計與主題切換", "右側為卡片檢視與翻卡控制"]
+    },
+    {
+      "id": "c3",
+      "topicId": "t3",
+      "title": "互動與切換",
+      "bullets": ["依主題切換可見卡片並重置索引", "支援左右鍵翻卡", "提供分頁控制以避免大量渲染"]
+    }
+  ],
+  "stats": {
+    "totalParagraphs": 5,
+    "totalKeypoints": 5,
+    "totalTopics": 3,
+    "totalCards": 3
+  }
+}
