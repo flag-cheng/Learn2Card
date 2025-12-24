@@ -1,41 +1,63 @@
 import { Deck } from "./types";
 
 const sampleDeck: Deck = {
+  meta: {
+    source: "sampleDeck（frontend/src/sampleDeck.ts）",
+    generatedAt: "2025-12-22T00:00:00.000Z",
+    schemaVersion: "1.0.0",
+  },
   paragraphs: [
     {
       id: "p1",
+      idx: 0,
       text: "專案目標是把長文轉成一疊可翻閱的卡片，方便快速掌握重點。",
-      summary: "將長文摘要為卡片提升瀏覽效率。",
-      keywords: ["摘要", "卡片化", "效率"],
-      sourceIndex: 0,
     },
     {
       id: "p2",
+      idx: 1,
       text: "P0 階段只需前端 UI shell，採用 React + TypeScript 搭配內建假資料。",
-      summary: "P0 只做 UI 展示，資料寫死在前端。",
-      keywords: ["P0", "React", "假資料"],
-      sourceIndex: 1,
     },
     {
       id: "p3",
+      idx: 2,
       text: "畫面包含標題列、左側統計與主題列表，以及右側卡片檢視區。",
-      summary: "UI 需有統計、主題列表與卡片檢視區。",
-      keywords: ["版面", "統計", "主題"],
-      sourceIndex: 2,
     },
     {
       id: "p4",
+      idx: 3,
       text: "卡片需要支援上一張與下一張按鈕，並根據主題切換可見卡片。",
-      summary: "按鈕可翻卡並支援主題篩選。",
-      keywords: ["互動", "翻卡", "主題"],
-      sourceIndex: 3,
     },
     {
       id: "p5",
+      idx: 4,
       text: "未來會改成讀取 deck.json，現階段只需確保 sampleDeck 可以 demo。",
-      summary: "未來讀檔，現在用 sampleDeck 展示。",
+    },
+  ],
+  keypoints: [
+    {
+      paragraphId: "p1",
+      sentence: "將長文整理成卡片組，讓讀者能快速掌握重點。",
+      keywords: ["摘要", "卡片化", "效率"],
+    },
+    {
+      paragraphId: "p2",
+      sentence: "P0 先以 React + TypeScript 的 UI shell 搭配假資料展示。",
+      keywords: ["P0", "React", "假資料"],
+    },
+    {
+      paragraphId: "p3",
+      sentence: "介面由標題列、左側統計與主題、右側卡片區構成。",
+      keywords: ["版面", "統計", "主題"],
+    },
+    {
+      paragraphId: "p4",
+      sentence: "卡片支援上一張/下一張並可依主題切換可見集合。",
+      keywords: ["互動", "翻卡", "主題"],
+    },
+    {
+      paragraphId: "p5",
+      sentence: "後續可切換為讀取 deck.json，維持同一套瀏覽體驗。",
       keywords: ["deck.json", "示範", "未來工作"],
-      sourceIndex: 4,
     },
   ],
   topics: [
@@ -88,9 +110,10 @@ const sampleDeck: Deck = {
     },
   ],
   stats: {
-    paragraphCount: 5,
-    topicCount: 3,
-    cardCount: 3,
+    totalParagraphs: 5,
+    totalKeypoints: 5,
+    totalTopics: 3,
+    totalCards: 3,
   },
 };
 
