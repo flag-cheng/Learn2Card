@@ -453,4 +453,21 @@
   color: #ffffff;
 }
 
+/* 測試 Bugbot 檢測：故意違規的命名 */
+.cardViewer {
+  display: flex;
+  gap: 12px;
+}
+
+.StatusBanner {
+  padding: 10px;
+  background: #fff1f2;
+}
+
+.primaryButton {
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: #2563eb !important;
+  color: white !important;
+}
 

@@ -65,22 +65,39 @@ function Card({ title, bullets, onNext, isLast = false }: CardProps) {
 
 ---
 
-## 🟢 建議改善（程式碼品質）
+## 🟡 重要問題（強烈建議修正）
 
 ### CSS 命名規範 [style]
+**禁止在 CSS 中使用 camelCase 或 PascalCase 類別名稱**
+
 ```css
+/* ❌ 絕對禁止：camelCase 或 PascalCase */
+.cardViewer { }      /* 違規！必須改為 .card-viewer */
+.StatusBanner { }    /* 違規！必須改為 .status-banner */
+.primaryButton { }   /* 違規！必須改為 .primary-button */
+
 /* ✅ 正確：kebab-case 命名 */
 .card-viewer { }
 .status-banner { }
 .primary-button { }
+```
 
-/* ⚠️ 避免：camelCase 或 PascalCase */
-.cardViewer { }
-.StatusBanner { }
+**原因**：CSS 類別混用命名風格會降低程式碼可維護性，且與現代前端工具鏈（如 Tailwind CSS、CSS Modules）慣例不一致。
 
-/* 🟢 建議：避免過度使用 !important */
+---
+
+## 🟢 建議改善（程式碼品質）
+
+### 避免過度使用 !important [style]
+```css
+/* ⚠️ 避免：過度使用 !important */
 .button {
   color: red !important;  /* 只在覆蓋第三方樣式時使用 */
+}
+
+/* ✅ 建議：透過提升選擇器優先權 */
+.app .button {
+  color: red;
 }
 ```
 ---
