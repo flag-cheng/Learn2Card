@@ -18,6 +18,14 @@ const DEFAULT_MAX_TOPICS = 5;
 const DEFAULT_MAX_BULLETS = 5;
 const PAGE_SIZE = 10;
 
+function resolveApiUrl(path: string): string {
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  const base = import.meta.env.VITE_API_BASE_URL;
+  if (!base) return normalizedPath;
+  const normalizedBase = base.endsWith("/") ? base.slice(0, -1) : base;
+  return `${normalizedBase}${normalizedPath}`;
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
@@ -348,7 +356,7 @@ const App = () => {
         const controller = new AbortController();
         const timeoutId = window.setTimeout(() => controller.abort(), 120_000);
 
-        const res = await fetch("http://127.0.0.1:8000/api/process", {
+        const res = await fetch(resolveApiUrl("/api/process"), {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(params),
@@ -395,7 +403,9 @@ const App = () => {
           return;
         }
         if (err instanceof TypeError) {
-          setProcessError("無法連接到 Backend，請確認 Backend 服務已啟動（127.0.0.1:8000）。");
+          setProcessError(
+            "無法連接到 Backend，請確認 Backend 服務已啟動，或前端的 VITE_API_BASE_URL 設定正確。"
+          );
           return;
         }
         const message = err instanceof Error ? err.message : "處理失敗：發生未知錯誤。";
