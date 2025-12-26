@@ -380,6 +380,7 @@ const App = () => {
           try {
             const parsed = parseDeck((body as Record<string, unknown>).deck);
             setDeck(parsed);
+            setDeckError(null);
             setProcessSuccess("已完成處理並更新卡片。");
           } catch {
             const ok = await loadDeck({ cacheBust: true });
