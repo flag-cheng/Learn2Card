@@ -7,18 +7,6 @@
 
 ## 🔴 嚴重問題（必須修正，否則不得合併）
 
-### 安全性 [security]
-```python
-# ❌ 禁止：硬編碼敏感資訊
-API_KEY = "sk-1234567890abcdef"
-PASSWORD = "admin123"
-
-# ✅ 正確：使用環境變數
-import os
-API_KEY = os.getenv("API_KEY")
-```
-**原因**：避免洩漏密鑰到版本控制系統。
-
 ### 空的錯誤處理 [quality]
 ```python
 # ❌ 禁止：空的 except 區塊
