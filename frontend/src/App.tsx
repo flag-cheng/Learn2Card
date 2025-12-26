@@ -95,7 +95,8 @@ function parseDeck(value: unknown): Deck {
     );
   }
 
-  return value as Deck;
+  // 已做過完整 runtime 檢查，這裡用更明確的轉型避免 TS 誤判。
+  return value as unknown as Deck;
 }
 
 function clamp(n: number, min: number, max: number): number {
@@ -151,7 +152,7 @@ const App = () => {
 
   const lastProcessParamsRef = useRef<ProcessParams | null>(null);
 
-  const loadDeck = useCallback(async (opts?: { cacheBust?: boolean }) => {
+  const loadDeck = useCallback(async (opts?: { cacheBust?: boolean }): Promise<boolean> => {
     const cacheBust = opts?.cacheBust ?? false;
     const url = cacheBust ? `/deck.json?t=${Date.now()}` : "/deck.json";
 
@@ -169,11 +170,13 @@ const App = () => {
       const data = (await res.json()) as unknown;
       const parsed = parseDeck(data);
       setDeck(parsed);
+      return true;
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "載入 deck.json 失敗：發生未知錯誤。";
       setDeckError(message);
       setDeck(null);
+      return false;
     } finally {
       setDeckLoading(false);
     }
@@ -369,14 +372,23 @@ const App = () => {
           try {
             const parsed = parseDeck((body as Record<string, unknown>).deck);
             setDeck(parsed);
+            setProcessSuccess("已完成處理並更新卡片。");
           } catch {
-            await loadDeck({ cacheBust: true });
+            const ok = await loadDeck({ cacheBust: true });
+            if (!ok) {
+              setProcessError("處理已完成，但載入卡片失敗，請點擊「重新載入卡片」或稍後重試。");
+              return;
+            }
+            setProcessSuccess("已完成處理並更新卡片。");
           }
         } else {
-          await loadDeck({ cacheBust: true });
+          const ok = await loadDeck({ cacheBust: true });
+          if (!ok) {
+            setProcessError("處理已完成，但載入卡片失敗，請點擊「重新載入卡片」或稍後重試。");
+            return;
+          }
+          setProcessSuccess("已完成處理並更新卡片。");
         }
-
-        setProcessSuccess("已完成處理並更新卡片。");
       } catch (err) {
         if (err instanceof DOMException && err.name === "AbortError") {
           setProcessError("處理逾時，請稍後重試。");
