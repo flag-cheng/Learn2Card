@@ -46,9 +46,12 @@ raise ValueError("Invalid input")  # 使用者會看到
 # ✅ 正確
 raise ValueError("輸入格式錯誤：請提供有效的電子郵件地址")
 ```
+---
+
+## 🟢 建議改善
 
 ### Git Commit Message 格式 [git]
-**強制格式**：`英文類別：繁體中文描述`
+**格式**：`英文類別：繁體中文描述`
 
 **允許的類別**：`add`、`fix`、`restruct`、`test`、`doc`（僅此五種）
 
@@ -65,7 +68,7 @@ restruct：將分頁邏輯抽成 paginator 模組
 test：補齊混中英與空文件案例
 doc：更新 API 錯誤碼說明
 
-# ❌ 錯誤範例
+# ❌ 不適當範例
 update：改一些東西           # 太空泛
 fix：try something          # 英文描述 + 空泛
 add: 新增功能                # 冒號後沒空格
