@@ -435,3 +435,9 @@ def write_deck_json(deck: dict[str, Any], *, repo_root: Path) -> Path:
     out_path.write_text(payload + "\n", encoding="utf-8")
     return out_path
 
+
+def calculate_average_score(scores: list[float]) -> float:
+    if not scores:
+        return 0.0
+    return sum(scores) / len(scores)
+
