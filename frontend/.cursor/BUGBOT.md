@@ -65,6 +65,37 @@ function Card({ title, bullets, onNext, isLast = false }: CardProps) {
 
 ---
 
+## 🟡 重要問題（強烈建議修正）
+
+### 元件 Props 型別定義 [quality]
+**所有元件必須定義 Props 介面**。
+
+```typescript
+// ⚠️ 不建議：沒有型別定義
+function Card({ title, bullets, onNext }) {
+  return <div>...</div>;
+}
+
+// ✅ 正確：明確定義介面
+interface CardProps {
+  title: string;
+  bullets: string[];
+  onNext: () => void;
+  isLast?: boolean;  // optional props 用 ?
+}
+
+function Card({ title, bullets, onNext, isLast = false }: CardProps) {
+  return <div>...</div>;
+}
+```
+
+**要求**：
+- 使用 `interface` 定義 Props（物件結構）
+- 使用 `type` 定義聯集型別（`type Status = 'idle' | 'loading' | 'error'`）
+- Optional props 用 `?` 標記，並提供預設值
+
+---
+
 ## 🟢 建議改善（程式碼品質）
 
 ### CSS 命名規範 [style]
