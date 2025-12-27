@@ -49,39 +49,6 @@ environment.yml
 
 ## 🟡 重要問題（強烈建議修正）
 
-### 型別標註 [quality]
-**所有公開函式建議有完整型別標註**
-
-```python
-# ⚠️ 不適合：缺少型別標註
-def process_text(text):
-    return text.strip()
-
-# ⚠️ 不適合：不完整的標註
-def process_text(text: str):  # 缺少回傳型別
-    return text.strip()
-
-# ✅ 推薦：完整標註
-def process_text(text: str) -> str:
-    return text.strip()
-
-# ✅ 推薦：使用 typing 模組處理複雜型別
-from typing import Optional, Literal
-
-def build_deck(
-    *,
-    text: str,
-    max_topics: int = 5,
-) -> dict[str, Any]:
-    ...
-```
-
-**原因**：型別標註可在開發階段發現 80% 的錯誤，顯著提升程式碼品質。
-
----
-
-## 🟢 建議改善（程式碼品質）
-
 ### API 錯誤格式（建議統一）[api]
 **所有錯誤回應建議遵循此格式**，確保前端可預期處理。
 
@@ -107,6 +74,29 @@ except Exception as e:                # 程式內部問題
 
 ---
 
+## 🟢 建議改善（程式碼品質）
+
+### Python 命名規範 [style]
+**禁止在 dataclass/Pydantic 模型屬性中使用 camelCase**
+
+```python
+# ❌ 錯誤：使用 camelCase
+@dataclass
+class Paragraph:
+    sourceIndex: int      # 違規！應為 source_index
+    memberIds: list[str]  # 違規！應為 member_ids
+
+# ✅ 正確：使用 snake_case
+@dataclass
+class Paragraph:
+    source_index: int
+    member_ids: list[str]
+```
+
+**原因**：違反 PEP 8 規範，與 Python 社群慣例不一致
+
+---
+
 ## 🚫 專案禁止事項總結
 以下行為**絕對禁止**，發現立即拒絕合併：
 
@@ -115,10 +105,10 @@ except Exception as e:                # 程式內部問題
 - ❌ 手動建立 `.venv` 或使用 `requirements.txt`
 
 ### 🟡 重要（違反專案規範）
-- ⚠️ 缺少型別標註或使用 `# type: ignore`
+- ⚠️ API 錯誤訊息用英文或格式不統一
 
 ### 🟢 建議改善）
-- 💡 API 錯誤訊息用英文或格式不統一
+- 💡 Python 命名規範應與社群慣例一致
 
 
 
