@@ -10,6 +10,10 @@ from pydantic import BaseModel, Field, field_validator
 
 from pipeline import ProcessingError, build_deck, write_deck_json
 
+# Testing [i18n] rule violation: This comment is in English
+# According to BUGBOT.md, all comments should be in Traditional Chinese
+# This is a deliberate test to check if Bugbot detects language violations in code comments
+# Expected: Bugbot should report this as violating the [i18n] 語言規範
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 

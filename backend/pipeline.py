@@ -25,6 +25,10 @@ def split_paragraphs(text: str) -> list[str]:
     """
     Split by headings (#...), blank lines, and list items.
 
+    Testing [i18n] rule: This docstring is in English.
+    According to BUGBOT.md, function documentation should explain "why"
+    and should be in Traditional Chinese when it's explanatory.
+    
     - Headings start a new paragraph.
     - Blank line flushes current paragraph.
     - List item becomes its own paragraph.
