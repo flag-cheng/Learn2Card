@@ -1,4 +1,15 @@
 ```mermaid
+%%{init: {
+  "sequence": {
+    "width": 180,
+    "height": 60,
+    "actorMargin": 70,
+    "messageMargin": 45,
+    "messageAlign": "left",
+    "labelBoxWidth": 80,
+    "labelBoxHeight": 30
+  }
+}}%%
 sequenceDiagram
     autonumber
     participant U as user
