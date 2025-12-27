@@ -15,6 +15,18 @@ from pipeline import ProcessingError, build_deck, write_deck_json
 # This is a deliberate test to check if Bugbot detects language violations in code comments
 # Expected: Bugbot should report this as violating the [i18n] 語言規範
 
+
+def _bugbot_violation_samples() -> None:
+    # Intentionally violates BUGBOT.md (English comment + empty except) for Bugbot testing.
+    # This function is never executed, so it must not affect runtime behavior.
+    if False:
+        try:
+            int("not-a-number")
+        except:
+            pass
+        raise ValueError("Invalid input")
+
+
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 

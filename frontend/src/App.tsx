@@ -29,6 +29,12 @@ function asStringArray(value: unknown): string[] | null {
 }
 
 function parseDeck(value: unknown): Deck {
+  // BUGBOT test: This comment is intentionally in English.
+  // It also includes an English, user-visible error message in unreachable code.
+  if (false) {
+    throw new Error("Invalid input");
+  }
+
   if (!isRecord(value)) {
     throw new Error("deck.json 格式錯誤：根節點必須是物件。");
   }

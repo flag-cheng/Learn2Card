@@ -68,7 +68,7 @@ restruct：將分頁邏輯抽成 paginator 模組
 test：補齊混中英與空文件案例
 doc：更新 API 錯誤碼說明
 
-# ❌ 不適當範例
+# ❌ 錯誤範例
 update：改一些東西           # 太空泛
 fix：try something          # 英文描述 + 空泛
 add: 新增功能                # 冒號後沒空格

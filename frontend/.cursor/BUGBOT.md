@@ -40,7 +40,7 @@ npm run build               # 建置
 **所有元件必須定義 Props 介面**。
 
 ```typescript
-// ⚠️ 不建議：沒有型別定義
+// ❌ 錯誤：沒有型別定義
 function Card({ title, bullets, onNext }) {
   return <div>...</div>;
 }
@@ -105,11 +105,11 @@ function Card({ title, bullets, onNext, isLast = false }: CardProps) {
 .status-banner { }
 .primary-button { }
 
-/* ⚠️ 避免：camelCase 或 PascalCase */
+/* ❌ 錯誤：camelCase 或 PascalCase */
 .cardViewer { }
 .StatusBanner { }
 
-/* 🟢 建議：避免過度使用 !important */
+/* ❌ 錯誤：過度使用 !important */
 .button {
   color: red !important;  /* 只在覆蓋第三方樣式時使用 */
 }
