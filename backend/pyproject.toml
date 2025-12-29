@@ -4,4 +4,14 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11.8"
-dependencies = []
+dependencies = [
+  "fastapi>=0.115.6",
+  "uvicorn>=0.34.0",
+]
+
+[project.scripts]
+cli = "learn2cards.cli:main"
+
+[build-system]
+requires = ["hatchling>=1.26.3"]
+build-backend = "hatchling.build"
