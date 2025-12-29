@@ -3,6 +3,17 @@
 Learn2Cards 是一個將 **Markdown/純文字文件** 自動歸納整理成「翻卡式大綱」的工具。  
 專案採用 **前後端分離架構**，由 **Cloud Agent 協作開發**，展示 AI Agent 驅動的軟體開發流程。
 
+## 📝 Testing Bugbot [i18n] Rule Violation
+
+**Note**: This section is intentionally written in English to test if Bugbot detects violations of the [i18n] rule which requires Traditional Chinese for all documentation. This is a deliberate test case to validate the BUGBOT.md configuration.
+
+**Purpose**: According to `.cursor/BUGBOT.md`, all documentation including README files must be written in Traditional Chinese. This English paragraph violates that rule and should trigger a Bugbot warning if the rule is properly enforced.
+
+**Expected Behavior**: If Bugbot correctly implements the [i18n] rule checking, it should report this section as a violation because:
+- This is documentation (README file)
+- The content is in English instead of Traditional Chinese
+- The BUGBOT.md explicitly lists "文件（README、API 文件）" as requiring Traditional Chinese
+
 ## 🎯 專案目標
 
 輸入 Markdown 或純文字 → 自動切段 → 提取重點與關鍵詞 → 語意分群 → 生成卡片 → 提供翻卡式 UI 瀏覽
